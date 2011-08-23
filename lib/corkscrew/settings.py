@@ -6,14 +6,17 @@ import ConfigParser
 
 from flask import Flask
 from jinja2 import FileSystemLoader
+from werkzeug import check_password_hash, generate_password_hash
 
-from hammock.util import report
+from report import report as report
 from .reflect import namedAny
 
 class FlaskSettings(object):
     """ combination option parser / settings parser for flask
         that reads the .ini format.
     """
+
+    DEFAULT_SETTINGS = None
 
     @classmethod
     def get_parser(kls):
@@ -23,12 +26,18 @@ class FlaskSettings(object):
         parser.add_option("--port",  dest="port",
                           default='', help="server listen port")
         parser.add_option("--shell", dest="shell",
-                          default=False, help="hammock db shell",
+                          default=False, help="application shell",
                           action='store_true')
         parser.add_option("--config", dest='config',
-                          default="./hammock.ini",
+                          default="",
                           help="use config file")
+        parser.add_option("--encode", dest='encode',
+                          default="",
+                          help="encode password hash using werkzeug")
         return parser
+
+    def __mod__(self, other):
+        return dict([ [x[len(other)+1:], self[x]] for x in self._settings.keys() if x.startswith(other+'.')])
 
     def __contains__(self,other):
         """ dictionary compatability """
@@ -47,7 +56,10 @@ class FlaskSettings(object):
             update that with any other overrides delivered to the parser.
         """
         self.options, self.args = self.get_parser().parse_args()
-        self._settings = self.load(file=self.DEFAULT_SETTINGS)
+        if self.DEFAULT_SETTINGS:
+            self._settings = self.load(file=self.DEFAULT_SETTINGS)
+        else:
+            self._settings = {}
         self._settings.update(self.load(file=self.options.config))
 
         # a few command line options are allowed to override the .ini
@@ -58,6 +70,7 @@ class FlaskSettings(object):
         # ie, things that have been passed into the option
         # parser but are not useful in the .ini
         self._settings.update({'user.shell' : self.options.shell and 'true' or ''})
+        self._settings.update({'user.encode_password':self.options.encode})
 
         # TODO: move this to ConfigParser subclass.
         # allow pythonic comments in the .ini files,
@@ -111,8 +124,9 @@ class FlaskSettings(object):
         """ returns a dictionary with key's of the form
             <section>.<option> and the values
         """
+        if not file: return {}
         if not os.path.exists(file):
-            raise ValueError,'config file @{f} does not exist'.format(f=file)
+            raise ValueError, 'config file @{f} does not exist'.format(f=file)
         config = config.copy()
         cp = ConfigParser.ConfigParser()
         cp.read(file)
@@ -126,6 +140,8 @@ class FlaskSettings(object):
         """ """
         if self['user.shell']:
             from IPython import Shell; Shell.IPShellEmbed(argv=['-noconfirm_exit'])()
+        elif self['user.encode_password']:
+            print generate_password_hash(self['user.encode_password'])
         else:
             app = self.app
             app.run(host=self['flask.host'],
