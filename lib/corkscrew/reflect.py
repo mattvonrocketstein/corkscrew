@@ -29,10 +29,7 @@ try:
 except ImportError:
     from StringIO import StringIO
 
-from twisted.python.util import unsignedID
-from twisted.python.deprecate import deprecated
-from twisted.python.deprecate import _fullyQualifiedName as fullyQualifiedName
-from twisted.python.versions import Version
+
 
 
 
@@ -514,7 +511,6 @@ def macro(name, filename, source, **identifiers):
 
     exec code in dict, dict
     return dict[name]
-macro = deprecated(Version("Twisted", 8, 2, 0))(macro)
 
 
 
@@ -534,7 +530,7 @@ def _determineClassName(x):
         try:
             return str(c)
         except:
-            return '<BROKEN CLASS AT 0x%x>' % unsignedID(c)
+            return '<BROKEN CLASS AT %s>' % str(c)
 
 
 
@@ -549,8 +545,8 @@ def _safeFormat(formatter, o):
         traceback.print_exc(file=io)
         className = _determineClassName(o)
         tbValue = io.getvalue()
-        return "<%s instance at 0x%x with %s error:\n %s>" % (
-            className, unsignedID(o), formatter.__name__, tbValue)
+        return "<%s instance at %s with %s error:\n %s>" % (
+            className, str(o), formatter.__name__, tbValue)
 
 
 
@@ -804,9 +800,9 @@ __all__ = [
     'QueueMethod', 'OriginalAccessor',
 
     'funcinfo', 'fullFuncName', 'qual', 'getcurrent', 'getClass', 'isinst',
-    'namedModule', 'namedObject', 'namedClass', 'namedAny', 'macro',
+    'namedModule', 'namedObject', 'namedClass', 'namedAny',
     'safe_repr', 'safe_str', 'allYourBase', 'accumulateBases',
     'prefixedMethodNames', 'addMethodNamesToDict', 'prefixedMethods',
     'accumulateClassDict', 'accumulateClassList', 'isSame', 'isLike',
     'modgrep', 'isOfType', 'findInstances', 'objgrep', 'filenameToModuleName',
-    'fullyQualifiedName']
+    ]
