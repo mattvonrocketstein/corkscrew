@@ -8,8 +8,11 @@ from flask import Flask
 from jinja2 import FileSystemLoader
 from werkzeug import check_password_hash, generate_password_hash
 
-from report import report as report
+import report as reporting
 from .reflect import namedAny
+
+report = reporting.getReporter(label=False)
+
 
 class FlaskSettings(object):
     """ combination option parser / settings parser for flask
@@ -17,7 +20,7 @@ class FlaskSettings(object):
     """
 
     DEFAULT_SETTINGS = None
-
+    default_file = 'corkscrew.ini'
     @classmethod
     def get_parser(kls):
         from optparse import OptionParser
@@ -56,11 +59,25 @@ class FlaskSettings(object):
             update that with any other overrides delivered to the parser.
         """
         self.options, self.args = self.get_parser().parse_args()
+
+        # special case
+        self.done=False
+        if self.options.encode:
+            print generate_password_hash(self.options.encode)
+            self.doit()
+            self.done=True
+            return
         if self.DEFAULT_SETTINGS:
             self._settings = self.load(file=self.DEFAULT_SETTINGS)
         else:
             self._settings = {}
-        self._settings.update(self.load(file=self.options.config))
+        if self.options.config:
+            _file = self.options.config
+        else:
+            import warnings
+            report("You did not pass in a config file with --config, assuming you want %s"%self.default_file)
+            _file = self.default_file
+        self._settings.update(self.load(file=_file))
 
         # a few command line options are allowed to override the .ini
         if self.options.port:
@@ -82,6 +99,9 @@ class FlaskSettings(object):
         report('finished parsing settings from',
                Global=self.DEFAULT_SETTINGS,
                Local=self.options.config)
+        self.doit()
+
+    def doit(self):
         global settings
         settings=self
 
@@ -112,7 +132,7 @@ class FlaskSettings(object):
         ## setup views
         view_holder = self['corkscrew.views']
         view_list = namedAny(view_holder)
-        [ v(app=app,settings=self) for v in view_list]
+        [ v(app=app, settings=self) for v in view_list]
 
         @app.route("/favicon.ico")
         def favicon():
@@ -124,9 +144,8 @@ class FlaskSettings(object):
         """ returns a dictionary with key's of the form
             <section>.<option> and the values
         """
-        if not file: return {}
         if not os.path.exists(file):
-            raise ValueError, 'config file @{f} does not exist'.format(f=file)
+            raise SystemExit('ERROR: config file at "{f}" does not exist'.format(f=file))
         config = config.copy()
         cp = ConfigParser.ConfigParser()
         cp.read(file)
@@ -138,10 +157,13 @@ class FlaskSettings(object):
 
     def run(self, *args, **kargs):
         """ """
+        if self.done: return
+
         if self['user.shell']:
-            from IPython import Shell; Shell.IPShellEmbed(argv=['-noconfirm_exit'])()
-        elif self['user.encode_password']:
-            print generate_password_hash(self['user.encode_password'])
+            try:
+                from IPython import Shell; Shell.IPShellEmbed(argv=['-noconfirm_exit'])()
+            except ImportError:
+                raise SystemExit("You need IPython installed if you want to use the shell.")
         else:
             app = self.app
             app.run(host=self['flask.host'],
