@@ -15,8 +15,8 @@ class FlaskView(object):
     requires_auth = False
 
     def __init__(self, app=None, settings=None):
-        """ when instantiated, the view will let the app know about it's
-            own urls.
+        """ when instantiated, the view will let the app
+             know about it's own urls.
         """
         self.__name__ = self.__class__.__name__.lower()
         self.settings = settings
@@ -24,9 +24,15 @@ class FlaskView(object):
             if self.url:
                 app.add_url_rule(self.url, self.__name__, self,
                                  methods=self.methods)
+        self.app = app
 
     def __call__(self):
-        """ """
+        """ 1) honor ``requires_auth`` class var and
+               redirects to login if necessary.
+            2) honor ``returns_json`` class var and
+               jsonify what is assumed to be a dictionary.
+            3) dispatch based on get/post maybe ?
+        """
         if self.requires_auth and not self.authorized:
             report('view requires authentication..redirecting to login',[self, g.user])
             return redirect('/login')
@@ -35,11 +41,23 @@ class FlaskView(object):
             result = jsonify(**result)
         return result
 
+    def __mod__(self, other):
+        """ self % var
+
+            get an item out of the corkscrew settings dictionary
+        """
+        return self.settings[other]
+
     def __getitem__(self, k):
+        """ self[var]
+
+            proxy accessor for the current requests values
+        """
         return request.values.get(k, None)
 
     @property
     def user(self):
+        """ proxy to flask's globals """
         return g.user
 
     @property
@@ -48,6 +66,7 @@ class FlaskView(object):
         return True if g.user else False
 
     def render_template(self, **kargs):
+        """ shortcut that knows about this ``template`` class-var """
         kargs.update(authenticated = self.authorized)
         return render_template(self.template, **kargs)
 View = FlaskView
