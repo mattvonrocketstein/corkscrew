@@ -16,7 +16,7 @@ class AuthCommon(View):
         _next = request.referrer
         if not _next or self.url in _next:
             _next = self%'corkscrew.default_auth_next'
-            return redirect(_next)
+        return redirect(_next)
 
 class Logout(AuthCommon):
     """Logs the user out."""
@@ -45,20 +45,17 @@ class Login(AuthCommon):
         return self._template
 
     def render_template(self, *args, **kargs):
+        """ variation of View.render_template that prefers
+            ``self.template`` on the filesystem, and failing
+            that will use an embedded template literal at
+            ``self._template``
+        """
         try:
             return super(self.__class__,self).render_template(*args, **kargs)
-        except jinja2.exceptions.TemplateNotFound,e:
-            from flask.templating import _request_ctx_stack,_render
-            t = jinja2.Template(self._template)
-            import copy
-            t.loader='hahaha'
-            #t.environment = copy.copy(self.app.jinja_env)
-            #t.environment.loader=self.app.jinja_loader
-            #from IPython import Shell; Shell.IPShellEmbed(argv=['-noconfirm_exit'])()
-            ctx = _request_ctx_stack.top
-            ctx.app.update_template_context(kargs)
-            return _render(t, kargs, ctx.app)
-
+        except jinja2.exceptions.TemplateNotFound, e:
+            from flask.templating import render_template_string
+            report("template {T} not found, using literal",T=self.template)
+            return render_template_string(self._template, **kargs)
 
     def main(self):
         """ """
