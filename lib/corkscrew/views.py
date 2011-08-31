@@ -70,3 +70,8 @@ class FlaskView(object):
         kargs.update(authenticated = self.authorized)
         return render_template(self.template, **kargs)
 View = FlaskView
+
+
+class SmartView(View):
+    """ """
+    pass
