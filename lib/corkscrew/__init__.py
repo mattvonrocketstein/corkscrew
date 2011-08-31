@@ -4,4 +4,4 @@
 """
 
 from .settings import Settings
-from .views import View
+from .views import View, SmartView
