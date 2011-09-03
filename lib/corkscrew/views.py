@@ -1,8 +1,12 @@
 """ corkscrew.views
 """
+import os
 
-from flask import request, jsonify, g, redirect
 from flask import render_template
+from flask import send_from_directory
+from flask import request, jsonify, g, redirect
+from report import report
+
 
 class FlaskView(object):
     """ FlaskView provides object-oriented view capabilities for flask,
@@ -18,6 +22,7 @@ class FlaskView(object):
         """ when instantiated, the view will let the app
              know about it's own urls.
         """
+
         self.__name__ = self.__class__.__name__.lower()
         self.settings = settings
         if app is not None:
@@ -25,6 +30,7 @@ class FlaskView(object):
                 app.add_url_rule(self.url, self.__name__, self,
                                  methods=self.methods)
         self.app = app
+        report('built view',self,self.url)
 
     def __call__(self):
         """ 1) honor ``requires_auth`` class var and
@@ -75,3 +81,11 @@ View = FlaskView
 class SmartView(View):
     """ """
     pass
+
+class Favicon(FlaskView):
+    """ doesn't work.  why?"""
+    url = '/favicon.ico'
+    def main(self):
+        raise Exception,'test'
+        return send_from_directory(os.path.join(app.root_path, 'static'),
+                                   'favicon.ico', mimetype='image/vnd.microsoft.icon')
