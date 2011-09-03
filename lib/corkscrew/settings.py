@@ -19,7 +19,6 @@ class FlaskSettings(object):
         that reads the .ini format.
     """
 
-    DEFAULT_SETTINGS = None
     default_file = 'corkscrew.ini'
     @classmethod
     def get_parser(kls):
@@ -67,14 +66,11 @@ class FlaskSettings(object):
             self.doit()
             self.done=True
             return
-        if self.DEFAULT_SETTINGS:
-            self._settings = self.load(file=self.DEFAULT_SETTINGS)
-        else:
-            self._settings = {}
+
+        self._settings = {}
         if self.options.config:
             _file = self.options.config
         else:
-            import warnings
             report("You did not pass in a config file with --config, assuming you want %s"%self.default_file)
             _file = self.default_file
         self._settings.update(self.load(file=_file))
@@ -88,20 +84,22 @@ class FlaskSettings(object):
         # parser but are not useful in the .ini
         self._settings.update({'user.shell' : self.options.shell and 'true' or ''})
         self._settings.update({'user.encode_password':self.options.encode})
+        def prepare(k,v):
+            """ allow pythonic comments in the .ini files,
+                and strip any trailing whitespace.
 
-        # TODO: move this to ConfigParser subclass.
-        # allow pythonic comments in the .ini files,
-        # and strip any trailing whitespace.
-        for k,v in self._settings.items():
+                TODO: move this to ConfigParser subclass.
+            """
             self._settings[k]=v.strip()
             if '#' in v:
                 self._settings[k]=v[:v.find('#')]
-        report('finished parsing settings from',
-               Global=self.DEFAULT_SETTINGS,
-               Local=self.options.config)
+
+        [ prepare(k,v) for k,v in self._settings.items() ]
+
         self.doit()
 
     def doit(self):
+        """ hack """
         global settings
         settings=self
 
