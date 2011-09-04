@@ -83,7 +83,7 @@ class SmartView(View):
     pass
 
 class Favicon(FlaskView):
-    """ doesn't work.  why?"""
+    """ TODO: change to use settings  """
     url = '/favicon.ico'
     def main(self):
         return send_from_directory(os.path.join(self.app.root_path, 'static'),
