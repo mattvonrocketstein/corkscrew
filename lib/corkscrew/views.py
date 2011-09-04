@@ -86,5 +86,5 @@ class Favicon(FlaskView):
     """ doesn't work.  why?"""
     url = '/favicon.ico'
     def main(self):
-        return send_from_directory(os.path.join(app.root_path, 'static'),
+        return send_from_directory(os.path.join(self.app.root_path, 'static'),
                                    'favicon.ico', mimetype='image/vnd.microsoft.icon')
