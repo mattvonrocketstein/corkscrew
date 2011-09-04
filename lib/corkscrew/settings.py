@@ -4,7 +4,7 @@
 import os
 import ConfigParser
 
-from flask import Flask
+from flask import Flask, url_for
 from jinja2 import FileSystemLoader
 from werkzeug import check_password_hash, generate_password_hash
 
@@ -131,10 +131,6 @@ class FlaskSettings(object):
         view_holder = self['corkscrew.views']
         view_list = namedAny(view_holder)
         [ v(app=app, settings=self) for v in view_list]
-
-        @app.route("/favicon.ico")
-        def favicon():
-            return app.send_static_file("favicon.ico")
 
         return app
 
