@@ -110,8 +110,12 @@ class FlaskSettings(object):
         """
 
         ## set flask specific things that are non-optional
-        app_name = self['flask.app']
-        secret_key = self['flask.secret_key']
+        error = lambda k: 'Fatal: You need to specify a "flask" section ' + \
+                'with an entry like  "'+k+'=..." in your .ini file'
+        try: app_name = self['flask.app']
+        except KeyError: raise SystemExit(error('app'))
+        try: secret_key = self['flask.secret_key']
+        except KeyError: raise SystemExit(error('secret_key'))
         app = Flask(app_name)
         app.secret_key = secret_key
 
@@ -128,11 +132,15 @@ class FlaskSettings(object):
             app.after_request(after_request)
 
         ## setup views
-        view_holder = self['corkscrew.views']
-        view_list = namedAny(view_holder)
-        [ v(app=app, settings=self) for v in view_list]
+        try: view_holder = self['corkscrew.views']
+        except KeyError:
+            error = 'Fatal: could not "view=<dotpath>" entry in your .ini file'
+            raise SystemExit(error)
+        else:
+            view_list = namedAny(view_holder)
+            [ v(app=app, settings=self) for v in view_list]
 
-        return app
+            return app
 
     def load(self, file, config={}):
         """ returns a dictionary with key's of the form
