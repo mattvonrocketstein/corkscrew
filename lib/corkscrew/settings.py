@@ -170,5 +170,5 @@ class FlaskSettings(object):
             app = self.app
             app.run(host=self['flask.host'],
                     port=int(self['flask.port']),
-                    debug=self['flask.debug'])
+                    debug=self['flask.debug'].lower()=='true')
 Settings=FlaskSettings
