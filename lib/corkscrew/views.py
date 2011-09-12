@@ -30,7 +30,6 @@ class FlaskView(object):
                 app.add_url_rule(self.url, self.__name__, self,
                                  methods=self.methods)
         self.app = app
-        report('built view',self,self.url)
 
     def __call__(self):
         """ 1) honor ``requires_auth`` class var and
