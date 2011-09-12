@@ -39,7 +39,10 @@ class FlaskSettings(object):
         return parser
 
     def __mod__(self, other):
-        return dict([ [x[len(other)+1:], self[x]] for x in self._settings.keys() if x.startswith(other+'.')])
+        """ namespacing: get all the settings that start with a certain string """
+        return dict([ [x[len(other)+1:], self[x]] \
+                      for x in self._settings.keys() \
+                      if x.startswith(other+'.')])
 
     def __contains__(self,other):
         """ dictionary compatability """
@@ -71,7 +74,7 @@ class FlaskSettings(object):
         if self.options.config:
             _file = self.options.config
         else:
-            report("You did not pass in a config file with --config, assuming you want %s"%self.default_file)
+            report("You did not pass in a config file with --config, assuming you want the default @ \"%s\""%self.default_file.strip())
             _file = self.default_file
         self._settings.update(self.load(file=_file))
 
@@ -132,15 +135,24 @@ class FlaskSettings(object):
             app.after_request(after_request)
 
         ## setup views
-        try: view_holder = self['corkscrew.views']
+        views = self._setup_views(app)
+        report('built urls: {u}',u=[v.url for v in views])
+
+        return app
+
+    def _setup_views(self, app):
+        """ NOTE: at this point app is only partially setup.
+                  (do not attempt to use the app @property here)
+        """
+        try:
+            view_holder = self['corkscrew.views']
         except KeyError:
-            error = 'Fatal: could not "view=<dotpath>" entry in your .ini file'
+            error = 'Fatal: could not "view=<dotpath>" entry in [corkscrew] section of your .ini file'
             raise SystemExit(error)
         else:
             view_list = namedAny(view_holder)
-            [ v(app=app, settings=self) for v in view_list]
-
-            return app
+            view_instances = [ v(app=app, settings=self) for v in view_list ]
+            return view_instances
 
     def load(self, file, config={}):
         """ returns a dictionary with key's of the form
@@ -167,8 +179,21 @@ class FlaskSettings(object):
             except ImportError:
                 raise SystemExit("You need IPython installed if you want to use the shell.")
         else:
-            app = self.app
-            app.run(host=self['flask.host'],
-                    port=int(self['flask.port']),
-                    debug=self['flask.debug'].lower()=='true')
-Settings=FlaskSettings
+            app  = self.app
+            port = int(self['flask.port'])
+            host = self['flask.host']
+            debug = self['flask.debug'].lower()=='true'
+            try:
+                runner_dotpath = self['flask.runner']
+                runner = namedAny(runner_dotpath)
+            except KeyError:
+                from corkscrew.runner import naive_runner
+                warnings.warn('item "runner" not found in [flask] section, using naive runner')
+                runner = naive_runner
+            runner(app=app,port=port,host=host,debug=debug)
+
+            import platform
+            node = platform.node()
+
+
+Settings = FlaskSettings
