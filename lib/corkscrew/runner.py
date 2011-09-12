@@ -1,8 +1,7 @@
 """ corkscrew.runners
 """
-
-
 from importlib import import_module
+
 class if_importable:
     def __init__(self, module_name, error='Could not import {module}.'):
         self.module_name=module_name
@@ -26,7 +25,7 @@ class if_importable:
         return new_func
 
 @if_importable('tornado')
-def tornado_runner(app=None, host=None, port=None, debug=None):
+def tornado(app=None, host=None, port=None, debug=None):
         """ copied from the tornado runner reccomended in flask docs """
         from tornado.wsgi import WSGIContainer
         from tornado.httpserver import HTTPServer
@@ -36,7 +35,7 @@ def tornado_runner(app=None, host=None, port=None, debug=None):
         http_server.listen(port)
         IOLoop.instance().start()
 
-def naive_runner(app=None,host=None,port=None,debug=None):
+def flask(app=None,host=None,port=None,debug=None):
     """ the flask default runner """
     return app.run(host=host,
                    port=port,
