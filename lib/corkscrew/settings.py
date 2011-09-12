@@ -27,6 +27,8 @@ class FlaskSettings(object):
         parser.set_conflict_handler("resolve")
         parser.add_option("--port",  dest="port",
                           default='', help="server listen port")
+        parser.add_option("--runner",  dest="runner",
+                          default='', help="dotpath for app server")
         parser.add_option("--shell", dest="shell",
                           default=False, help="application shell",
                           action='store_true')
@@ -74,7 +76,6 @@ class FlaskSettings(object):
         if self.options.config:
             _file = self.options.config
         else:
-            report("You did not pass in a config file with --config, assuming you want the default @ \"%s\""%self.default_file.strip())
             _file = self.default_file
         self._settings.update(self.load(file=_file))
 
@@ -87,6 +88,8 @@ class FlaskSettings(object):
         # parser but are not useful in the .ini
         self._settings.update({'user.shell' : self.options.shell and 'true' or ''})
         self._settings.update({'user.encode_password':self.options.encode})
+        self._settings.update({'user.runner':self.options.runner})
+
         def prepare(k,v):
             """ allow pythonic comments in the .ini files,
                 and strip any trailing whitespace.
@@ -136,8 +139,8 @@ class FlaskSettings(object):
 
         ## setup views
         views = self._setup_views(app)
-        report('built urls: {u}',u=[v.url for v in views])
-
+        #report('built urls: {u}',u=[v.url for v in views])
+        reporting.console.draw_line()
         return app
 
     def _setup_views(self, app):
@@ -169,6 +172,26 @@ class FlaskSettings(object):
                 config[name + "." + opt.lower()] = cp.get(sec, opt).strip()
         return config
 
+    @property
+    def runner(self):
+        if self['user.runner']:
+            runner_dotpath = self['user.runner']
+        else:
+            try:
+                runner_dotpath = self['flask.runner']
+            except KeyError:
+                warning = 'item "runner" not found in [flask] section, using naive runner'
+                warnings.warn(warning)
+                runner_dotpath = 'corkscrew.runner.naive_runner'
+        try:
+            runner = namedAny(runner_dotpath)
+        except AttributeError:
+            err="Could not find runner specified by dotpath: "+runner_dotpath
+            raise AttributeError,err
+        else:
+            report("Using runner: {r}",r=runner_dotpath)
+            return runner
+
     def run(self, *args, **kargs):
         """ """
         if self.done: return
@@ -183,13 +206,7 @@ class FlaskSettings(object):
             port = int(self['flask.port'])
             host = self['flask.host']
             debug = self['flask.debug'].lower()=='true'
-            try:
-                runner_dotpath = self['flask.runner']
-                runner = namedAny(runner_dotpath)
-            except KeyError:
-                from corkscrew.runner import naive_runner
-                warnings.warn('item "runner" not found in [flask] section, using naive runner')
-                runner = naive_runner
+            runner = self.runner
             runner(app=app,port=port,host=host,debug=debug)
 
             import platform
