@@ -178,7 +178,7 @@ class FlaskSettings(object):
             runner_dotpath = self['user.runner']
         else:
             try:
-                runner_dotpath = self['flask.runner']
+                runner_dotpath = self['corkscrew.runner']
             except KeyError:
                 warning = 'item "runner" not found in [flask] section, using naive runner'
                 warnings.warn(warning)
