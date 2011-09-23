@@ -192,13 +192,18 @@ class FlaskSettings(object):
             report("Using runner: {r}",r=runner_dotpath)
             return runner
 
+    def shell_namespace(self):
+        return dict(settings=self)
+
     def run(self, *args, **kargs):
         """ """
         if self.done: return
 
         if self['user.shell']:
             try:
-                from IPython import Shell; Shell.IPShellEmbed(argv=['-noconfirm_exit'])()
+                from IPython import Shell;
+                Shell.IPShellEmbed(argv=['-noconfirm_exit'],
+                                   user_ns=self.shell_namespace())()
             except ImportError:
                 raise SystemExit("You need IPython installed if you want to use the shell.")
         else:
