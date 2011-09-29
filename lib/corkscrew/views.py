@@ -2,6 +2,7 @@
 """
 import os
 
+import jinja2
 from flask import render_template
 from flask import send_from_directory
 from flask import request, jsonify, g, redirect
@@ -73,7 +74,13 @@ class FlaskView(object):
     def render_template(self, **kargs):
         """ shortcut that knows about this ``template`` class-var """
         kargs.update(authenticated = self.authorized)
-        return render_template(self.template, **kargs)
+        try:
+            return render_template(self.template, **kargs)
+        except jinja2.exceptions.TemplateNotFound:
+            report('search order: {s}',
+                   s=[ '/'.join(x.split('/')[-3:]) for x in self.app.jinja_loader.searchpath])
+            raise
+
 View = FlaskView
 
 

@@ -2,6 +2,7 @@
 """
 
 import os
+import importlib
 import ConfigParser
 
 from flask import Flask, url_for
@@ -22,6 +23,7 @@ class FlaskSettings(object):
     default_file = 'corkscrew.ini'
     @classmethod
     def get_parser(kls):
+        """ build the default parser """
         from optparse import OptionParser
         parser = OptionParser()
         parser.set_conflict_handler("resolve")
@@ -41,12 +43,14 @@ class FlaskSettings(object):
         return parser
 
     def __mod__(self, other):
-        """ namespacing: get all the settings that start with a certain string """
+        """ namespacing:
+            get all the settings that start with a certain string
+        """
         return dict([ [x[len(other)+1:], self[x]] \
                       for x in self._settings.keys() \
                       if x.startswith(other+'.')])
 
-    def __contains__(self,other):
+    def __contains__(self, other):
         """ dictionary compatability """
         return other in self._settings
 
@@ -127,7 +131,8 @@ class FlaskSettings(object):
 
         ## set flask specific things that are optional
         if 'flask.template_path' in self:
-            app.jinja_loader = FileSystemLoader(self['template_path'])
+            raise Exception,'niy'
+            app.jinja_loader = FileSystemLoader(self['flask.template_path'])
         if 'flask.before_request' in self:
             before_request = self['flask.before_request']
             before_request = namedAny(before_request)
@@ -136,6 +141,18 @@ class FlaskSettings(object):
             after_request = self['flask.after_request']
             after_request = namedAny(after_request)
             app.after_request(after_request)
+
+        if 'corkscrew.templates' in self:
+            modules = self['corkscrew.templates'].split(',')
+            for module in modules:
+                mdir = os.path.dirname(importlib.import_module(module).__file__)
+                tdir = os.path.join(mdir, 'templates')
+                if not os.path.exists(tdir):
+                    report("template dir specified does not exist "+str(tdir))
+                else:
+                    if tdir not in app.jinja_loader.searchpath:
+                        report('adding {t} to templates search',t=tdir)
+                        app.jinja_loader.searchpath += [tdir]
 
         ## setup views
         views = self._setup_views(app)
@@ -174,6 +191,7 @@ class FlaskSettings(object):
 
     @property
     def runner(self):
+        """ """
         if self['user.runner']:
             runner_dotpath = self['user.runner']
         else:
@@ -193,19 +211,25 @@ class FlaskSettings(object):
             return runner
 
     def shell_namespace(self):
-        return dict(settings=self)
+        """ publish the namespace that's available to shell.
+            subclasses should not forget to call super()!
+        """
+        return dict(app=self.app, settings=self)
 
     def run(self, *args, **kargs):
-        """ """
+        """ this is a thing that probably does not belong in a
+            settings abstraction, but it is very useful.. """
         if self.done: return
 
         if self['user.shell']:
             try:
                 from IPython import Shell;
-                Shell.IPShellEmbed(argv=['-noconfirm_exit'],
-                                   user_ns=self.shell_namespace())()
             except ImportError:
                 raise SystemExit("You need IPython installed if you want to use the shell.")
+            else:
+                Shell.IPShellEmbed(argv=['-noconfirm_exit'],
+                                   user_ns=self.shell_namespace())()
+
         else:
             app  = self.app
             port = int(self['flask.port'])
