@@ -44,7 +44,6 @@ class FlaskView(object):
                 report("Adding new template path: ",tpath)
                 self.app.jinja_loader.searchpath+=[tpath]
 
-
     def __call__(self):
         """ 1) honor ``requires_auth`` class var and
                redirects to login if necessary.

@@ -13,7 +13,7 @@ report = reporting.report
 
 class AuthCommon(View):
     def auth_redirect(self):
-        _next = request.referrer
+        _next = self['next'] or request.referrer
         if not _next or self.url in _next:
             _next = self%'corkscrew.default_auth_next'
         return redirect(_next)
@@ -66,6 +66,7 @@ class Login(AuthCommon):
         if request.method == 'POST':
             users = self.settings%'users'
             user = self['username']
+            next = self['next']
             if user not in users:
                 return self.render_template(error='Invalid username')
             if not check_password_hash(users[user],self['password']):
