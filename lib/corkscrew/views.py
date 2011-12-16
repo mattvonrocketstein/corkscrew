@@ -10,6 +10,11 @@ from flask import send_from_directory
 from flask import request, jsonify, g, redirect
 from report import report
 
+def add_template_to_search_path(tpath, app):
+    if tpath not in app.jinja_loader.searchpath:
+        report("Adding new template path: ",tpath)
+        app.jinja_loader.searchpath += [tpath]
+
 
 class FlaskView(object):
     """ FlaskView provides object-oriented view capabilities for flask,
@@ -34,15 +39,13 @@ class FlaskView(object):
                                  methods=self.methods)
         self.app = app
 
-        if getattr(self,'local_templates',False):
+        if getattr(self, 'local_templates', False):
             tpath = os.path.dirname(inspect.getfile(self.__class__))
             tpath = os.path.join(tpath, 'templates')
             if not os.path.exists(tpath):
                 err = 'local_templates is True for class, but no template directory exists'
                 raise ValueError(err)
-            if tpath not in self.app.jinja_loader.searchpath:
-                report("Adding new template path: ",tpath)
-                self.app.jinja_loader.searchpath+=[tpath]
+            add_template_to_search_path(tpath, self.app)
 
     def __call__(self):
         """ 1) honor ``requires_auth`` class var and
