@@ -245,7 +245,7 @@ class FlaskSettings(object):
             host = self['flask.host']
             debug = self['flask.debug'].lower()=='true'
             runner = self.runner
-            runner(app=app,port=port,host=host,debug=debug)
+            runner(app=app, port=port, host=host, debug=debug)
             node = platform.node()
 
 
