@@ -2,6 +2,7 @@
 """
 
 import os
+import platform
 import importlib
 import ConfigParser
 
@@ -61,14 +62,23 @@ class FlaskSettings(object):
         """ dictionary compatability """
         return self._settings[k]
 
+    @property
+    def settings_file(self):
+        if self.options.config:
+            _file = self.options.config
+        else:
+            _file = self._init_filename or self.default_file
+        _file = os.path.expanduser(_file)
+        return _file
 
-    def __init__(self):
+    def __init__(self, filename=None):
         """
             first load the default config so that overrides don't need
             to mention everything.  update default with the config
             specified by the command line optionparser, then
             update that with any other overrides delivered to the parser.
         """
+        self._init_filename = filename
         self.options, self.args = self.get_parser().parse_args()
 
         # special case
@@ -80,11 +90,7 @@ class FlaskSettings(object):
             return
 
         self._settings = {}
-        if self.options.config:
-            _file = self.options.config
-        else:
-            _file = self.default_file
-        self._settings.update(self.load(file=_file))
+        self._settings.update(self.load(file=self.settings_file))
 
         # a few command line options are allowed to override the .ini
         if self.options.port:
@@ -240,8 +246,6 @@ class FlaskSettings(object):
             debug = self['flask.debug'].lower()=='true'
             runner = self.runner
             runner(app=app,port=port,host=host,debug=debug)
-
-            import platform
             node = platform.node()
 
 
