@@ -14,6 +14,8 @@ from .reflect import namedAny
 
 report = reporting.getReporter(label=False)
 
+class SettingsError(Exception):
+    pass
 
 class FlaskSettings(object):
     """ combination option parser / settings parser for flask
@@ -21,6 +23,7 @@ class FlaskSettings(object):
     """
 
     default_file = 'corkscrew.ini'
+
     @classmethod
     def get_parser(kls):
         """ build the default parser """
@@ -123,9 +126,9 @@ class FlaskSettings(object):
         error = lambda k: 'Fatal: You need to specify a "flask" section ' + \
                 'with an entry like  "'+k+'=..." in your .ini file'
         try: app_name = self['flask.app']
-        except KeyError: raise SystemExit(error('app'))
+        except KeyError: raise SettingsError(error('app'))
         try: secret_key = self['flask.secret_key']
-        except KeyError: raise SystemExit(error('secret_key'))
+        except KeyError: raise SettingsError(error('secret_key'))
         app = Flask(app_name)
         app.secret_key = secret_key
 
@@ -168,7 +171,7 @@ class FlaskSettings(object):
             view_holder = self['corkscrew.views']
         except KeyError:
             error = 'Fatal: could not "view=<dotpath>" entry in [corkscrew] section of your .ini file'
-            raise SystemExit(error)
+            raise SettingsError(error)
         else:
             view_list = namedAny(view_holder)
             view_instances = [ v(app=app, settings=self) for v in view_list ]
@@ -179,7 +182,7 @@ class FlaskSettings(object):
             <section>.<option> and the values
         """
         if not os.path.exists(file):
-            raise SystemExit('ERROR: config file at "{f}" does not exist'.format(f=file))
+            raise SettingsError('ERROR: config file at "{f}" does not exist'.format(f=file))
         config = config.copy()
         cp = ConfigParser.ConfigParser()
         cp.read(file)
@@ -225,7 +228,7 @@ class FlaskSettings(object):
             try:
                 from IPython import Shell;
             except ImportError:
-                raise SystemExit("You need IPython installed if you want to use the shell.")
+                raise SettingsError("You need IPython installed if you want to use the shell.")
             else:
                 Shell.IPShellEmbed(argv=['-noconfirm_exit'],
                                    user_ns=self.shell_namespace())()
