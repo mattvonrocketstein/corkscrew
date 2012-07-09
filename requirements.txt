@@ -1,3 +1,4 @@
+importlib
 flask
 pygments
 git+git://github.com/mattvonrocketstein/reporting.git#egg=reporting
