@@ -58,6 +58,8 @@ class FlaskView(object):
             report('view requires authentication..redirecting to login',[self, g.user])
             return redirect('/login')
         result = self.main()
+        if not result:
+            report("WARNING: null result {0} given from {1}".format(result, self.main))
         if self.returns_json:
             result = jsonify(**result)
         return result
@@ -74,7 +76,13 @@ class FlaskView(object):
 
             proxy accessor for the current requests values
         """
-        return request.values.get(k, None)
+        try:
+            return request.values.get(k, None)
+        except AttributeError:
+            # when this happens from, say, a shell, the
+            # LocalProxy for the request will malfunction
+            # and that is unavoidable
+            return None
 
     @property
     def user(self):
