@@ -11,7 +11,7 @@ from jinja2 import FileSystemLoader
 from werkzeug import check_password_hash, generate_password_hash
 
 import report as reporting
-from .reflect import namedAny
+from corkscrew.reflect import namedAny
 
 report = reporting.getReporter(label=False)
 
@@ -120,7 +120,7 @@ class FlaskSettings(object):
     def doit(self):
         """ hack """
         global settings
-        settings=self
+        settings = self
 
     @property
     def app(self):
@@ -164,7 +164,7 @@ class FlaskSettings(object):
                         app.jinja_loader.searchpath += [tdir]
 
         ## setup views
-        views = self._setup_views(app)
+        self._installed_views = self._setup_views(app)
         #report('built urls: {u}',u=[v.url for v in views])
         reporting.console.draw_line()
         return app
