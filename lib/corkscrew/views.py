@@ -11,6 +11,9 @@ from flask import request, jsonify, g, redirect
 from report import report
 
 def add_template_to_search_path(tpath, app):
+    if not app:
+        report('warning! app is null.  nonstandard init?')
+        return
     if tpath not in app.jinja_loader.searchpath:
         report("Adding new template path: ",tpath)
         app.jinja_loader.searchpath += [tpath]
