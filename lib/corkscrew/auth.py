@@ -7,6 +7,7 @@ from flask import render_template, g, flash
 from flask import request, session, redirect
 
 from corkscrew import View
+from corkscrew.blueprint import BluePrint
 
 import report as reporting
 report = reporting.report
@@ -22,7 +23,7 @@ class Logout(AuthCommon):
     """Logs the user out."""
     url     = '/logout'
     methods = ["GET"]
-
+    blueprint = BluePrint('logout', __name__)
     def main(self):
         flash('You were logged out')
         session.pop('user_id', None)
@@ -36,6 +37,7 @@ class Login(AuthCommon):
     url      = '/login'
     methods  = methods = ["GET", "POST"]
     template = 'login.html'
+    blueprint = BluePrint('login', __name__)
 
     def template_literal(self, t):
         self._template = t

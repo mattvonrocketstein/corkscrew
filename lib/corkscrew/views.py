@@ -10,6 +10,8 @@ from flask import send_from_directory
 from flask import request, jsonify, g, redirect
 from report import report
 
+from corkscrew.blueprint import BluePrint
+
 def add_template_to_search_path(tpath, app):
     if not app:
         report('warning! app is null.  nonstandard init?')
@@ -28,6 +30,7 @@ class FlaskView(object):
     returns_json  = False
     methods       = ('GET',)
     requires_auth = False
+    blueprint     = None
 
     def __init__(self, app=None, settings=None):
         """ when instantiated, the view will let the app
@@ -36,19 +39,24 @@ class FlaskView(object):
 
         self.__name__ = self.__class__.__name__.lower()
         self.settings = settings
-        if app is not None:
-            if self.url:
-                app.add_url_rule(self.url, self.__name__, self,
-                                 methods=self.methods)
         self.app = app
 
-        if getattr(self, 'local_templates', False):
-            tpath = os.path.dirname(inspect.getfile(self.__class__))
-            tpath = os.path.join(tpath, 'templates')
-            if not os.path.exists(tpath):
-                err = 'local_templates is True for class, but no template directory exists'
-                raise ValueError(err)
-            add_template_to_search_path(tpath, self.app)
+        ### this from blueprints now, but in the short term might need it for reference
+        if self.blueprint is None:
+            raise Exception, 'old style!!' + str([self.__class__.__name__,
+                                                  self.__class__.__module__])
+        #if all([self.url,
+        #        self.blueprint is None,
+        #        app is not None]):
+        #    app.add_url_rule(self.url, self.__name__, self,
+        #                     methods=self.methods)
+        #if getattr(self, 'local_templates', False):
+        #    tpath = os.path.dirname(inspect.getfile(self.__class__))
+        #    tpath = os.path.join(tpath, 'templates')
+        #    if not os.path.exists(tpath):
+        #        err = 'local_templates is True for class, but no template directory exists'
+        #        raise ValueError(err)
+        #    add_template_to_search_path(tpath, self.app)
 
     def __call__(self):
         """ 1) honor ``requires_auth`` class var and
@@ -117,6 +125,7 @@ class SmartView(View):
 class Favicon(FlaskView):
     """ TODO: change to use settings  """
     url = '/favicon.ico'
+    blueprint = BluePrint('favicon', __name__)
     def main(self):
         return send_from_directory(os.path.join(self.app.root_path, 'static'),
                                    'favicon.ico', mimetype='image/vnd.microsoft.icon')
