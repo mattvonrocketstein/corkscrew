@@ -1,8 +1,10 @@
-"""
+""" corkscrew.blueprint
 """
 
-import os
+import os, uuid
+
 from flask import Blueprint
+from report import report
 
 def generate_name():
     return '' #os.popen('uuidgen -t').read().strip()
@@ -32,4 +34,9 @@ class BluePrint(Blueprint):
             name = first
             import_name = second
 
-        return super(BluePrint,self).__init__(name, import_name, *args, **kargs)
+        try:
+            super(BluePrint,self).__init__(name, import_name, *args, **kargs)
+        except ImportError,e:
+            # nonstandard init like --shell, etc
+            report("squashing import error: "+str(e))
+            super(BluePrint,self).__init__(str(uuid.uuid1()),__name__)
