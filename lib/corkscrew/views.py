@@ -12,15 +12,6 @@ from report import report
 
 from corkscrew.blueprint import BluePrint
 
-def add_template_to_search_path(tpath, app):
-    if not app:
-        report('warning! app is null.  nonstandard init?')
-        return
-    if tpath not in app.jinja_loader.searchpath:
-        report("Adding new template path: ",tpath)
-        app.jinja_loader.searchpath += [tpath]
-
-
 class FlaskView(object):
     """ FlaskView provides object-oriented view capabilities for flask,
         and encapsulates a few of the flask conventions and semantics
@@ -43,20 +34,19 @@ class FlaskView(object):
 
         ### this from blueprints now, but in the short term might need it for reference
         if self.blueprint is None:
-            raise Exception, 'old style!!' + str([self.__class__.__name__,
-                                                  self.__class__.__module__])
-        #if all([self.url,
-        #        self.blueprint is None,
-        #        app is not None]):
-        #    app.add_url_rule(self.url, self.__name__, self,
-        #                     methods=self.methods)
-        #if getattr(self, 'local_templates', False):
-        #    tpath = os.path.dirname(inspect.getfile(self.__class__))
-        #    tpath = os.path.join(tpath, 'templates')
-        #    if not os.path.exists(tpath):
-        #        err = 'local_templates is True for class, but no template directory exists'
-        #        raise ValueError(err)
-        #    add_template_to_search_path(tpath, self.app)
+            raise TypeError,'FlaskView subclass must define a blueprint'
+
+    def install_into_app(v,app):
+        """ returns a list of subviews that need work """
+        # NOTE: think this does have to be done here instead of v.__init__
+        assert v.blueprint
+        if not v.blueprint.name:
+            v.blueprint.name = v.__class__.__name__
+        report('registering blueprint: ' + str([v.blueprint, v.url]))
+        #v = v.blueprint.route(v.url)(v)
+        app.add_url_rule(v.url, v.__name__, v)
+        app.register_blueprint(v.blueprint)
+        return []
 
     def __call__(self):
         """ 1) honor ``requires_auth`` class var and

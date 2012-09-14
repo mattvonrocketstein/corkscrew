@@ -11,10 +11,8 @@ def generate_name():
 
 class BluePrint(Blueprint):
     def __repr__(self):
-        msg = '<{0}.{1} "{2}" from {3}>'
-        msg = msg.format(self.__class__.__module__,
-                         self.__class__.__name__,
-                         self.name, self.import_name)
+        msg = '<BP "{0}" from {1}>'
+        msg = msg.format(self.name, self.import_name)
         return msg
 
     def __init__(self, first, *args, **kargs):

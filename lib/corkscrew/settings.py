@@ -182,13 +182,8 @@ class FlaskSettings(object):
             view_list = namedAny(view_holder)
             view_instances = [ v(app=app, settings=self) for v in view_list ]
             for v in view_instances:
-                # NOTE: think this does have to be done here instead of v.__init__
-                assert v.blueprint
-                if not v.blueprint.name:
-                    v.blueprint.name = v.__class__.__name__
-                report('registering blueprint: ' + str([v.blueprint]))
-                v = v.blueprint.route(v.url)(v)
-                app.register_blueprint(v.blueprint)
+                sub_views = v.install_into_app(app)
+                view_instances += sub_views
             return view_instances
 
     def load(self, file, config={}):
