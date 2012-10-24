@@ -12,7 +12,35 @@ from report import report
 
 from corkscrew.blueprint import BluePrint
 
-class FlaskView(object):
+class LazyView(object):
+    def __init__(self, app=None, settings=None):
+        """ when instantiated, the view will let the app
+            know about it's own urls.
+        """
+        self.__name__ = self.__class__.__name__.lower()
+        self.settings = settings
+        self.app = app
+
+    @property
+    def authorized(self):
+        """ """
+        return True if g.user else False
+
+    def install_into_app(self, *args, **kargs):
+        return []
+
+    def render_template(self, **kargs):
+        """ shortcut that knows about this ``template`` class-var """
+        kargs.update(authenticated = self.authorized)
+        try:
+            return render_template(self.template, **kargs)
+        except jinja2.exceptions.TemplateNotFound:
+            report('search order: {s}',
+                   s=[ '/'.join(x.split('/')[-3:]) for x in self.app.jinja_loader.searchpath])
+            raise
+    render = render_template
+
+class FlaskView(LazyView):
     """ FlaskView provides object-oriented view capabilities for flask,
         and encapsulates a few of the flask conventions and semantics
         into one package.
@@ -23,14 +51,11 @@ class FlaskView(object):
     requires_auth = False
     blueprint     = None
 
-    def __init__(self, app=None, settings=None):
+    def __init__(self, *args, **kargs):
         """ when instantiated, the view will let the app
              know about it's own urls.
         """
-
-        self.__name__ = self.__class__.__name__.lower()
-        self.settings = settings
-        self.app = app
+        super(FlaskView,self).__init__(*args, **kargs)
 
         ### this from blueprints now, but in the short term might need it for reference
         if self.blueprint is None:
@@ -89,21 +114,6 @@ class FlaskView(object):
     def user(self):
         """ proxy to flask's globals """
         return g.user
-
-    @property
-    def authorized(self):
-        """ """
-        return True if g.user else False
-
-    def render_template(self, **kargs):
-        """ shortcut that knows about this ``template`` class-var """
-        kargs.update(authenticated = self.authorized)
-        try:
-            return render_template(self.template, **kargs)
-        except jinja2.exceptions.TemplateNotFound:
-            report('search order: {s}',
-                   s=[ '/'.join(x.split('/')[-3:]) for x in self.app.jinja_loader.searchpath])
-            raise
 
 View = FlaskView
 
