@@ -11,8 +11,9 @@ from flask import request, jsonify, g, redirect
 from report import report
 
 from corkscrew.blueprint import BluePrint
-
+from flask import abort
 class LazyView(object):
+    abort = abort
     def __init__(self, app=None, settings=None):
         """ when instantiated, the view will let the app
             know about it's own urls.
