@@ -7,7 +7,7 @@ pip-log.txt
 *#
 *.#*
 *.sw[op]
-node/
+node
 docs/build
 
 .project
