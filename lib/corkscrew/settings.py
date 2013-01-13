@@ -180,7 +180,13 @@ class FlaskSettings(object):
             raise SettingsError(error)
         else:
             view_list = namedAny(view_holder)
-            view_instances = [ v(app=app, settings=self) for v in view_list ]
+            view_instances = []
+            for v in view_list:
+                try:
+                    view_instances.append(v(app=app, settings=self))
+                except Exception, e:
+                    report('error working with view: '+str(v))
+                    raise
             for v in view_instances:
                 sub_views = v.install_into_app(app)
                 view_instances += sub_views

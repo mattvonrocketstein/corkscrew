@@ -1,13 +1,15 @@
 """ corkscrew.runners
 """
+
 import os
 import signal
 from importlib import import_module
 
+from report import report
+from corkscrew.settings import settings
+
 def write_pid_file():
     """ write the pidfile """
-    from report import report
-    from corkscrew.settings import settings
     pid_file = settings['corkscrew.pid_file']
     if os.path.abspath(pid_file) != pid_file:
         err = 'Please use absolute path for "pid_file" entry in [corkscrew] section'
