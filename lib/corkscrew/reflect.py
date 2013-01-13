@@ -1,7 +1,6 @@
 # -*- test-case-name: twisted.test.test_reflect -*-
 # Copyright (c) 2001-2010 Twisted Matrix Laboratories.
 # See LICENSE for details.
-
 """
 Standardized versions of various cool and/or strange things that you can do
 with Python's reflection capabilities.

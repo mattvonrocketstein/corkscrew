@@ -39,9 +39,6 @@ class Login(AuthCommon):
     template = 'login.html'
     blueprint = BluePrint('login', __name__)
 
-    def template_literal(self, t):
-        self._template = t
-
     def __invert__(self):
         """ give the template literal if present. """
         return self._template

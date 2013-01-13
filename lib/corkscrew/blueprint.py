@@ -3,13 +3,13 @@
 
 import os, uuid
 
-from flask import Blueprint
+from flask import Blueprint as _Blueprint
 from report import report
 
 def generate_name():
     return '' #os.popen('uuidgen -t').read().strip()
 
-class BluePrint(Blueprint):
+class BluePrint(_Blueprint):
     def __repr__(self):
         msg = '<BP "{0}" from {1}>'
         msg = msg.format(self.name, self.import_name)
