@@ -5,13 +5,14 @@ import os
 import jinja2
 import inspect
 
+from flask import abort
 from flask import render_template
 from flask import send_from_directory
 from flask import request, jsonify, g, redirect
 from report import report
 
 from corkscrew.blueprint import BluePrint
-from flask import abort
+
 class LazyView(object):
     abort = abort
     def __init__(self, app=None, settings=None):
@@ -37,7 +38,8 @@ class LazyView(object):
             return render_template(self.template, **kargs)
         except jinja2.exceptions.TemplateNotFound:
             report('search order: {s}',
-                   s=[ '/'.join(x.split('/')[-3:]) for x in self.app.jinja_loader.searchpath])
+                   s=[ '/'.join(x.split('/')[-3:]) \
+                       for x in self.app.jinja_loader.searchpath ])
             raise
     render = render_template
 
