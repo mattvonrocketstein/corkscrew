@@ -78,6 +78,7 @@ class FlaskSettings(object):
             specified by the command line optionparser, then
             update that with any other overrides delivered to the parser.
         """
+        self._app_cache = None
         self._init_filename = filename
         self.options, self.args = self.get_parser().parse_args()
 
@@ -127,7 +128,7 @@ class FlaskSettings(object):
         """ derive flask app based on the combination of command-line
             options and the contents of the .ini files
         """
-
+        if self._app_cache: return self._app_cache
         ## set flask specific things that are non-optional
         error = lambda k: 'Fatal: You need to specify a "flask" section ' + \
                 'with an entry like  "'+k+'=..." in your .ini file'
@@ -167,6 +168,7 @@ class FlaskSettings(object):
         self._installed_views = self._setup_views(app)
         #report('built urls: {u}',u=[v.url for v in views])
         reporting.console.draw_line()
+        self._app_cache = app
         return app
 
     def _setup_views(self, app):
