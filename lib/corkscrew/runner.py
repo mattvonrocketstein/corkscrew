@@ -1,4 +1,4 @@
-""" corkscrew.runners
+""" corkscrew.runner
 """
 
 import os
@@ -76,3 +76,5 @@ def flask(app=None, host=None, port=None, debug=None):
     return app.run(host=host,
                    port=port,
                    debug=debug)
+# this is the default runner used by corkscrew.settings
+naive_runner = flask
