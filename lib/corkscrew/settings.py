@@ -2,6 +2,7 @@
 """
 
 import os
+import warnings
 import platform
 import importlib
 import ConfigParser
@@ -178,7 +179,8 @@ class FlaskSettings(object):
         try:
             view_holder = self['corkscrew.views']
         except KeyError:
-            error = 'Fatal: could not "view=<dotpath>" entry in [corkscrew] section of your .ini file'
+            error = ('Fatal: could not "view=<dotpath>" entry in the'
+                     '[corkscrew] section of your .ini file')
             raise SettingsError(error)
         else:
             view_list = namedAny(view_holder)
