@@ -1,3 +1,5 @@
+""" corkscrew.bin._corkscrew
+"""
 def entry(settings=None):
     """ Main entry point """
     from corkscrew import settings

@@ -68,7 +68,9 @@ class FlaskSettings(object):
         if self.options.config:
             _file = self.options.config
         else:
-            _file = self._init_filename or self.default_file
+            _file = self._init_filename or \
+                    os.environ.get('CORKSCREW_SETTINGS') or \
+                    self.default_file
         _file = os.path.expanduser(_file)
         return _file
 
@@ -129,6 +131,9 @@ class FlaskSettings(object):
         """ derive flask app based on the combination of command-line
             options and the contents of the .ini files
         """
+        return self._get_app()
+
+    def _get_app(self):
         if self._app_cache: return self._app_cache
         ## set flask specific things that are non-optional
         error = lambda k: 'Fatal: You need to specify a "flask" section ' + \
