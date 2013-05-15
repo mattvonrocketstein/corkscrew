@@ -5,6 +5,7 @@ import os
 import jinja2
 import inspect
 
+import flask
 from flask import abort
 from flask import render_template
 from flask import send_from_directory
@@ -12,6 +13,7 @@ from flask import request, jsonify, g, redirect
 from report import report
 
 from corkscrew.blueprint import BluePrint
+from corkscrew.util import use_local_template
 
 class LazyView(object):
     abort = abort
@@ -22,6 +24,10 @@ class LazyView(object):
         self.__name__ = self.__class__.__name__.lower()
         self.settings = settings
         self.app = app
+
+    @property
+    def request(self):
+        return request
 
     @property
     def authorized(self):
@@ -49,6 +55,10 @@ class FlaskView(LazyView):
         into one package.
     """
 
+    redirect = staticmethod(flask.redirect)
+    flash    = staticmethod(flask.flash)
+    flask    = flask
+
     returns_json  = False
     methods       = ('GET',)
     requires_auth = False
@@ -70,7 +80,7 @@ class FlaskView(LazyView):
         assert v.blueprint
         if not v.blueprint.name:
             v.blueprint.name = v.__class__.__name__
-        report('registering blueprint: ' + str([v.blueprint, v.url]))
+        #report('registering blueprint: ' + str([v.blueprint, v.url]))
         #v = v.blueprint.route(v.url)(v)
         app.add_url_rule(v.url, v.__name__, v)
         app.register_blueprint(v.blueprint)
@@ -120,9 +130,11 @@ class FlaskView(LazyView):
 
 View = FlaskView
 
-
 class SmartView(View):
-    """ """
+    """ smartviews are ones that might have their own
+        templates embedded in docstrings.  (yes, i know
+        you think this is a terrible idea, i dont care)
+    """
     pass
 
 class Favicon(FlaskView):
@@ -131,4 +143,50 @@ class Favicon(FlaskView):
     blueprint = BluePrint('favicon', __name__)
     def main(self):
         return send_from_directory(os.path.join(self.app.root_path, 'static'),
-                                   'favicon.ico', mimetype='image/vnd.microsoft.icon')
+                                   'favicon.ico',
+                                   mimetype='image/vnd.microsoft.icon')
+
+class SettingsView(View):
+    url = '/__settings__'
+    blueprint = BluePrint('settings', __name__)
+    requires_auth = True
+    requires_auth = True
+
+    @use_local_template
+    def main(self):
+        """
+        <table>
+          <tr>
+            <td><b>root</b></td><td>{{rootpath}}</td>
+          </tr>
+        </table>
+        """
+        return dict(rootpath=self.app.root_path)
+
+class ListViews(View):
+    url = '/__views__'
+    blueprint=BluePrint('views', __name__)
+    requires_auth = True
+    @use_local_template
+    def main(self):
+        """
+        {# renders a list of all views.. #}
+        <table>
+          <tr>
+             <td>view</td>
+             <td>url</td>
+             <td>from module</td>
+
+          </tr>
+          <tr><td colspan=4> <hr/></td></tr>
+          {% for v in views %}
+          <tr>
+            <td><b>{{v.__name__}}</b></td>
+            <td><i>{{v.url}}</i></td>
+            <td><small>{{v.__class__.__module__}}<small></td>
+          </tr>
+          {%endfor%}
+        </table>
+        """
+        # TODO: might as well organize 'views' by schema
+        return dict(views=self.settings._installed_views)
