@@ -5,7 +5,7 @@ import os
 import warnings
 import platform
 import importlib
-import ConfigParser
+import configparser
 
 from flask import Flask, url_for
 from jinja2 import FileSystemLoader
@@ -93,8 +93,10 @@ class FlaskSettings(object):
             self.done=True
             return
 
-        self._settings = {}
-        self._settings.update(self.load(file=self.settings_file))
+        #self._settings = {}
+        #self._settings.update(self.load(file=self.settings_file))
+        #self._settings.update(self._config_parser)
+        self._settings = self.load(file=self.settings_file)
 
         # a few command line options are allowed to override the .ini
         if self.options.port:
@@ -103,11 +105,13 @@ class FlaskSettings(object):
         # build a special section for things the user wants,
         # ie, things that have been passed into the option
         # parser but are not useful in the .ini
-        self._settings.update({'user.shell' : self.options.shell and 'true' or ''})
-        self._settings.update({'user.encode_password':self.options.encode})
-        self._settings.update({'user.runner':self.options.runner})
+        if 'user' not in self._settings:
+            self._settings['user']={}
+        self._settings['user']['shell'] = self.options.shell and 'true' or ''
+        self._settings['user']['encode_password'] = self.options.encode
+        self._settings['user']['runner'] = self.options.runner
 
-        def prepare(k,v):
+        def prepare(k, v):
             """ allow pythonic comments in the .ini files,
                 and strip any trailing whitespace.
 
@@ -117,7 +121,7 @@ class FlaskSettings(object):
             if '#' in v:
                 self._settings[k]=v[:v.find('#')]
 
-        [ prepare(k,v) for k,v in self._settings.items() ]
+        #[ prepare(k,v) for k,v in self._settings.items() ]
 
         self.doit()
 
@@ -138,28 +142,29 @@ class FlaskSettings(object):
         ## set flask specific things that are non-optional
         error = lambda k: 'Fatal: You need to specify a "flask" section ' + \
                 'with an entry like  "'+k+'=..." in your .ini file'
-        try: app_name = self['flask.app']
+        try: app_name = self['flask']['app']
         except KeyError: raise SettingsError(error('app'))
-        try: secret_key = self['flask.secret_key']
+        try: secret_key = self['flask']['secret_key']
         except KeyError: raise SettingsError(error('secret_key'))
         app = Flask(app_name)
         app.secret_key = secret_key
 
         ## set flask specific things that are optional
-        if 'flask.template_path' in self:
+        flask_section = self['flask']
+        if 'template_path' in flask_section:
             raise Exception,'niy'
-            app.jinja_loader = FileSystemLoader(self['flask.template_path'])
-        if 'flask.before_request' in self:
-            before_request = self['flask.before_request']
+            app.jinja_loader = FileSystemLoader(self['flask']['template_path'])
+        if 'before_request' in flask_section:
+            before_request = self['flask']['before_request']
             before_request = namedAny(before_request)
             app.before_request(before_request)
-        if 'flask.after_request' in self:
-            after_request = self['flask.after_request']
+        if 'after_request' in flask_section:
+            after_request = self['flask']['after_request']
             after_request = namedAny(after_request)
             app.after_request(after_request)
 
         if 'corkscrew.templates' in self:
-            modules = self['corkscrew.templates'].split(',')
+            modules = self['corkscrew']['templates'].split(',')
             for module in modules:
                 mdir = os.path.dirname(importlib.import_module(module).__file__)
                 tdir = os.path.join(mdir, 'templates')
@@ -181,10 +186,11 @@ class FlaskSettings(object):
         """ NOTE: at this point app is only partially setup.
                   (do not attempt to use the app @property here)
         """
+        corkscrew_section = self['corkscrew']
         try:
-            view_holder = self['corkscrew.views']
+            view_holder = corkscrew_section['views']
         except KeyError:
-            error = ('Fatal: could not "view=<dotpath>" entry in the'
+            error = ('Fatal: could not find "view=<dotpath>" entry in the'
                      '[corkscrew] section of your .ini file')
             raise SettingsError(error)
         else:
@@ -205,25 +211,25 @@ class FlaskSettings(object):
         """ returns a dictionary with key's of the form
             <section>.<option> and the values
         """
+        class MyConfigParser(configparser.ConfigParser):
+            pass
         if not os.path.exists(file):
             raise SettingsError('ERROR: config file at "{f}" does not exist'.format(f=file))
         config = config.copy()
-        cp = ConfigParser.ConfigParser()
+        cp = MyConfigParser()
         cp.read(file)
-        for sec in cp.sections():
-            name = sec.lower()
-            for opt in cp.options(sec):
-                config[name + "." + opt.lower()] = cp.get(sec, opt).strip()
-        return config
+        return cp
 
     @property
     def runner(self):
         """ """
-        if self['user.runner']:
+        user_section = self['user']
+        corkscrew_section = self['corkscrew']
+        if user_section['runner']:
             runner_dotpath = self['user.runner']
         else:
             try:
-                runner_dotpath = self['corkscrew.runner']
+                runner_dotpath = self['corkscrew']['runner']
             except KeyError:
                 warning = 'item "runner" not found in [flask] section, using naive runner'
                 warnings.warn(warning)
@@ -248,7 +254,7 @@ class FlaskSettings(object):
             settings abstraction, but it is very useful.. """
         if self.done: return
 
-        if self['user.shell']:
+        if self._settings['user']['shell']:
             try:
                 from IPython import Shell;
             except ImportError:
@@ -259,9 +265,9 @@ class FlaskSettings(object):
 
         else:
             app  = self.app
-            port = int(self['flask.port'])
-            host = self['flask.host']
-            debug = self['flask.debug'].lower()=='true'
+            port = int(self['flask']['port'])
+            host = self['flask']['host']
+            debug = self['flask']['debug'].lower()=='true'
             runner = self.runner
             runner(app=app, port=port, host=host, debug=debug)
             node = platform.node()
