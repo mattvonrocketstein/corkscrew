@@ -100,7 +100,10 @@ class FlaskView(LazyView):
         if not result:
             report("WARNING: null result {0} given from {1}".format(result, self.main))
         if self.returns_json:
-            result = jsonify(**result)
+            try:
+                result = jsonify(**result)
+            except TypeError:
+                raise TypeError, 'cannot jasonify: '+str(result)
         return result
 
     def __mod__(self, other):
