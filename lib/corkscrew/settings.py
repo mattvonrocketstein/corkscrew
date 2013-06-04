@@ -144,7 +144,7 @@ class FlaskSettings(object):
                 'with an entry like  "'+k+'=..." in your .ini file'
         try: app_name = self['flask']['app']
         except KeyError: raise SettingsError(error('app'))
-        try: secret_key = self['flask']['secret_key']
+        try: secret_key = str(self['flask']['secret_key'])
         except KeyError: raise SettingsError(error('secret_key'))
         app = Flask(app_name)
         app.secret_key = secret_key
@@ -266,6 +266,7 @@ class FlaskSettings(object):
         else:
             app  = self.app
             port = int(self['flask']['port'])
+            report('running on port: {0}'.format(port))
             host = self['flask']['host']
             debug = self['flask']['debug'].lower()=='true'
             runner = self.runner

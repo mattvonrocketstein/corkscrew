@@ -10,7 +10,7 @@ from corkscrew.settings import settings
 
 def write_pid_file():
     """ write the pidfile """
-    pid_file = settings['corkscrew.pid_file']
+    pid_file = settings['corkscrew']['pid_file']
     if os.path.abspath(pid_file) != pid_file:
         err = 'Please use absolute path for "pid_file" entry in [corkscrew] section'
         raise RuntimeError(err)
