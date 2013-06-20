@@ -86,6 +86,12 @@ class FlaskView(LazyView):
         app.register_blueprint(v.blueprint)
         return []
 
+    def __str__(self):
+        # FIXME HACK
+        out = super(FlaskView,self).__str__()
+        out = out.split('object at')[0].strip()
+        return out+'>'
+
     def __call__(self):
         """ 1) honor ``requires_auth`` class var and
                redirects to login if necessary.
@@ -103,7 +109,8 @@ class FlaskView(LazyView):
             try:
                 result = jsonify(**result)
             except TypeError:
-                raise TypeError, 'cannot jasonify: '+str(result)
+                raise TypeError(('{0} cannot JSONify "{1}", but '
+                                 ' {0}.returns_json==True').format(self, result))
         return result
 
     def __mod__(self, other):
