@@ -7,16 +7,17 @@ from importlib import import_module
 
 from report import report
 from corkscrew.settings import settings
+expanduser = os.path.expanduser
 
 def write_pid_file():
     """ write the pidfile """
-    pid_file = settings['corkscrew']['pid_file']
+    pid_file = expanduser(settings['corkscrew']['pid_file'])
     if os.path.abspath(pid_file) != pid_file:
         err = 'Please use absolute path for "pid_file" entry in [corkscrew] section'
         raise RuntimeError(err)
     else:
         if os.path.exists(pid_file):
-            with open(pid_file,'r') as fhandle:
+            with open(pid_file, 'r') as fhandle:
                 try:
                     pid = int(fhandle.read().strip())
                 except ValueError:
@@ -30,7 +31,7 @@ def write_pid_file():
                         pass
                     else:
                         raise
-        with open(pid_file,'w') as fhandle:
+        with open(pid_file, 'w') as fhandle:
             new_pid = str(os.getpid())
             fhandle.write(new_pid)
         report('this pid is {p}', p=new_pid)
