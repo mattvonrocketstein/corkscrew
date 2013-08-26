@@ -82,7 +82,13 @@ class FlaskView(LazyView):
             v.blueprint.name = v.__class__.__name__
         #report('registering blueprint: ' + str([v.blueprint, v.url]))
         #v = v.blueprint.route(v.url)(v)
+        #try:
         app.add_url_rule(v.url, v.__name__, v)
+        #except Exception,e:
+        #report("error adding view: "+str(v))
+            #print 'error adding url rule'
+            #from IPython import Shell; Shell.IPShellEmbed(argv=['-noconfirm_exit'])()
+            #raise
         app.register_blueprint(v.blueprint)
         return []
 

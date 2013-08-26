@@ -51,9 +51,10 @@ class FlaskSettings(object):
         """ namespacing:
             get all the settings that start with a certain string
         """
+        raise Exception, 'dont use this'
         return dict([ [x[len(other)+1:], self[x]] \
                       for x in self._settings.keys() \
-                      if x.startswith(other+'.')])
+                      if x.lower()==other.lower()])
 
     def __contains__(self, other):
         """ dictionary compatability """
@@ -151,6 +152,7 @@ class FlaskSettings(object):
 
         ## set flask specific things that are optional
         flask_section = self['flask']
+        corkscrew_section = self['corkscrew']
         if 'template_path' in flask_section:
             raise Exception,'niy'
             app.jinja_loader = FileSystemLoader(self['flask']['template_path'])
@@ -163,8 +165,8 @@ class FlaskSettings(object):
             after_request = namedAny(after_request)
             app.after_request(after_request)
 
-        if 'corkscrew.templates' in self:
-            modules = self['corkscrew']['templates'].split(',')
+        if 'templates' in corkscrew_section:
+            modules = corkscrew_section['templates'].split(',')
             for module in modules:
                 mdir = os.path.dirname(importlib.import_module(module).__file__)
                 tdir = os.path.join(mdir, 'templates')
@@ -174,6 +176,8 @@ class FlaskSettings(object):
                     if tdir not in app.jinja_loader.searchpath:
                         report('adding {t} to templates search',t=tdir)
                         app.jinja_loader.searchpath += [tdir]
+        else:
+            report("WARNING! 'templates' entry not found in corkscrew section")
 
         ## setup views
         self._installed_views = self._setup_views(app)
