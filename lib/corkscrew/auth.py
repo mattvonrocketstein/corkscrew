@@ -63,10 +63,11 @@ class Login(AuthCommon):
             return self.auth_redirect()
 
         if request.method == 'POST':
-            users = self.settings%'users'
+            users = self.settings['users']
             user = self['username']
             next = self['next']
             if user not in users:
+                #print __file__,':valid users:', users
                 return self.render_template(error='Invalid username')
             if not check_password_hash(users[user],self['password']):
                 return self.render_template(error='Invalid password')
