@@ -140,7 +140,8 @@ class FlaskSettings(Dictionaryish):
         """
         return self._get_app()
 
-    def _parse_autoindex(self, app, flask_section):
+    def _parse_autoindex(self, app):
+        flask_section = self['flask']
         if 'autoindex' not in flask_section:
             raise RuntimeError('you do not have a setting for autoindex '
                                '(it is required even if it is empty).'
@@ -148,7 +149,7 @@ class FlaskSettings(Dictionaryish):
                                '[flask]  of your .ini')
         else:
             from corkscrew.dir_index import DirView
-            return DirView(app=app, settings=settings)
+            return DirView(app=app, settings=self)
 
 
     def _get_app(self):
@@ -167,7 +168,7 @@ class FlaskSettings(Dictionaryish):
         flask_section = self['flask']
         corkscrew_section = self['corkscrew']
 
-        self._parse_autoindex(app, flask_section)
+        self._parse_autoindex(app)
 
         if 'template_path' in flask_section:
             raise Exception,'niy'

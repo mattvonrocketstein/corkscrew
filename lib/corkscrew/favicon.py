@@ -1,7 +1,9 @@
 """ corkscrew.favicon """
 
 import os
+from flask import send_from_directory
 from .views import FlaskView, BluePrint
+
 
 class Favicon(FlaskView):
     """ TODO: change to use settings  """

@@ -8,7 +8,6 @@ import inspect
 import flask
 from flask import abort
 from flask import render_template
-from flask import send_from_directory
 from flask import request, jsonify, g, redirect
 from report import report
 
