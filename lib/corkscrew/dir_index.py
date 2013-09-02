@@ -11,7 +11,7 @@ def _install_index(app, filepath, url):
     idx   = AutoIndex(app, filepath, **kargs)
     @app.route(url)
     @app.route(url+'<path:path>')
-    def autoindex(path='.'):
+    def autoindex(path='/'):
         return idx.render_autoindex(path)
     return idx
 
