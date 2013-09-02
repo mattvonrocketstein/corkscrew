@@ -1,6 +1,11 @@
 """ corkscrew.util
 """
+import os
 from flask import render_template_string
+
+opj = os.path.join
+ope = os.path.exists
+isdir = os.path.isdir
 
 def use_local_template(func):
     """ example usage:

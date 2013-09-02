@@ -17,6 +17,7 @@ from corkscrew.util import use_local_template
 
 class LazyView(object):
     abort = abort
+    report = staticmethod(report)
     def __init__(self, app=None, settings=None):
         """ when instantiated, the view will let the app
             know about it's own urls.
@@ -74,8 +75,13 @@ class FlaskView(LazyView):
         if self.blueprint is None:
             raise TypeError,'FlaskView subclass must define a blueprint'
 
-    def install_into_app(v,app):
-        """ returns a list of subviews that need work """
+    @use_local_template
+    def render_error(self, msg):
+        """ <font color=red>{{err}}</font> """
+        return dict(err=msg)
+
+    def install_into_app(v, app):
+        """ TODO: returns a list of subviews that need work """
         # NOTE: think this does have to be done here instead of v.__init__
         assert v.blueprint
         if not v.blueprint.name:
@@ -153,14 +159,7 @@ class SmartView(View):
     """
     pass
 
-class Favicon(FlaskView):
-    """ TODO: change to use settings  """
-    url = '/favicon.ico'
-    blueprint = BluePrint('favicon', __name__)
-    def main(self):
-        return send_from_directory(os.path.join(self.app.root_path, 'static'),
-                                   'favicon.ico',
-                                   mimetype='image/vnd.microsoft.icon')
+from .favicon import Favicon
 
 class SettingsView(View):
     url = '/__settings__'
@@ -206,3 +205,14 @@ class ListViews(View):
         """
         # TODO: might as well organize 'views' by schema
         return dict(views=self.settings._installed_views)
+
+class FourOhFourView(LazyView):
+
+    template = 'page_not_found.html'
+
+    def __init__(self, *args, **kargs):
+        super(FourOhFourView, self).__init__(*args, **kargs)
+
+        @self.app.errorhandler(404)
+        def not_found(error):
+            return self.render(), 404

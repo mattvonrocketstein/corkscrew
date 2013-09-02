@@ -1,0 +1,16 @@
+{% extends '__autoindex__/autoindex.html' %}
+
+{% block meta %}
+  {{ super() }}
+  <!--link rel="stylesheet"
+    href="{{ url_for('static', filename='myautoindex.css') }}" /-->
+{% endblock %}
+
+{% block header %}
+  <div style="width: 800px; margin: 10px auto;">
+    <b>corkscrew</b>
+{% endblock %}
+
+{% block footer %}
+  </div>
+{% endblock %}

@@ -2,6 +2,7 @@
 """
 
 import os
+import demjson
 import warnings
 import platform
 import importlib
@@ -19,7 +20,16 @@ report = reporting.getReporter(label=False)
 class SettingsError(Exception):
     pass
 
-class FlaskSettings(object):
+class Dictionaryish(object):
+    def __contains__(self, other):
+        """ dictionary compatability """
+        return other in self._settings
+
+    def __getitem__(self,k):
+        """ dictionary compatability """
+        return self._settings[k]
+
+class FlaskSettings(Dictionaryish):
     """ combination option parser / settings parser for flask
         that reads the .ini format.
     """
@@ -55,14 +65,6 @@ class FlaskSettings(object):
         return dict([ [x[len(other)+1:], self[x]] \
                       for x in self._settings.keys() \
                       if x.lower()==other.lower()])
-
-    def __contains__(self, other):
-        """ dictionary compatability """
-        return other in self._settings
-
-    def __getitem__(self,k):
-        """ dictionary compatability """
-        return self._settings[k]
 
     @property
     def settings_file(self):
@@ -138,6 +140,17 @@ class FlaskSettings(object):
         """
         return self._get_app()
 
+    def _parse_autoindex(self, app, flask_section):
+        if 'autoindex' not in flask_section:
+            raise RuntimeError('you do not have a setting for autoindex '
+                               '(it is required even if it is empty).'
+                               ' to continue, put "autoindex={}" in the '
+                               '[flask]  of your .ini')
+        else:
+            from corkscrew.dir_index import DirView
+            return DirView(app=app, settings=settings)
+
+
     def _get_app(self):
         if self._app_cache: return self._app_cache
         ## set flask specific things that are non-optional
@@ -153,6 +166,9 @@ class FlaskSettings(object):
         ## set flask specific things that are optional
         flask_section = self['flask']
         corkscrew_section = self['corkscrew']
+
+        self._parse_autoindex(app, flask_section)
+
         if 'template_path' in flask_section:
             raise Exception,'niy'
             app.jinja_loader = FileSystemLoader(self['flask']['template_path'])
@@ -160,6 +176,7 @@ class FlaskSettings(object):
             before_request = self['flask']['before_request']
             before_request = namedAny(before_request)
             app.before_request(before_request)
+
         if 'after_request' in flask_section:
             after_request = self['flask']['after_request']
             after_request = namedAny(after_request)
