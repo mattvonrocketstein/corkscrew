@@ -1,4 +1,6 @@
 flask
+demjson
 pygments
 configparser
+Flask-AutoIndex
 git+git://github.com/mattvonrocketstein/reporting.git#egg=reporting
