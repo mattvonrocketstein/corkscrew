@@ -85,15 +85,12 @@ class FlaskView(LazyView):
         assert v.blueprint
         if not v.blueprint.name:
             v.blueprint.name = v.__class__.__name__
-        #report('registering blueprint: ' + str([v.blueprint, v.url]))
-        #v = v.blueprint.route(v.url)(v)
-        #try:
-        app.add_url_rule(v.url, v.__name__, v)
-        #except Exception,e:
-        #report("error adding view: "+str(v))
-            #print 'error adding url rule'
-            #from IPython import Shell; Shell.IPShellEmbed(argv=['-noconfirm_exit'])()
-            #raise
+        try:
+            app.add_url_rule(v.url, v.__name__, v)
+        except AssertionError:
+            report("ERROR! adding view: {0}@{1}. url would have been {3}".format(
+                v.__name__, v, v.url))
+            raise
         app.register_blueprint(v.blueprint)
         return []
 
