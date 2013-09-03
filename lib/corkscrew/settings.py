@@ -42,6 +42,10 @@ class FlaskSettings(Dictionaryish):
         from optparse import OptionParser
         parser = OptionParser()
         parser.set_conflict_handler("resolve")
+        parser.add_option(
+            "-c", default='',dest='cmd',
+            help="like python -c: \"a program passed in as string (terminates option list)\"")
+
         parser.add_option("--port",  dest="port",
                           default='', help="server listen port")
         parser.add_option("--runner",  dest="runner",
@@ -58,13 +62,7 @@ class FlaskSettings(Dictionaryish):
         return parser
 
     def __mod__(self, other):
-        """ namespacing:
-            get all the settings that start with a certain string
-        """
         raise Exception, 'dont use this'
-        return dict([ [x[len(other)+1:], self[x]] \
-                      for x in self._settings.keys() \
-                      if x.lower()==other.lower()])
 
     @property
     def settings_file(self):
@@ -89,7 +87,7 @@ class FlaskSettings(Dictionaryish):
         self.options, self.args = self.get_parser().parse_args()
 
         # special case
-        self.done=False
+        self.done = False
         if self.options.encode:
             print generate_password_hash(self.options.encode)
             self.doit()
@@ -274,6 +272,13 @@ class FlaskSettings(Dictionaryish):
     def run(self, *args, **kargs):
         """ this is a thing that probably does not belong in a
             settings abstraction, but it is very useful.. """
+
+        if self.options.cmd:
+            ns=globals()
+            ns.update(settings=self)
+            exec self.options.cmd in self.shell_namespace()
+            self.done = True
+
         if self.done: return
 
         if self._settings['user']['shell']:
