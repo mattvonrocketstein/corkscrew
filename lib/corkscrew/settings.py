@@ -150,17 +150,40 @@ class FlaskSettings(Dictionaryish):
             return DirView(app=app, settings=self)
 
 
+    def _setup_secret_key(self, app):
+        err = ('use "secret_key" in the [flask] '
+               'section of your ini, not "secretkey"')
+        assert 'secretkey' not in self['flask'], err
+        try: secret_key = str(self['flask']['secret_key'])
+        except KeyError: raise SettingsError(error('secret_key'))
+        app.secret_key = secret_key
+
+    def _setup_pre_request(self, app):
+        flask_section = self['flask']
+        if 'before_request' in flask_section:
+            before_request = self['flask']['before_request']
+            before_request = namedAny(before_request)
+            app.before_request(before_request)
+
+    def _setup_post_request(self, app):
+        flask_section = self['flask']
+        if 'after_request' in flask_section:
+            after_request = self['flask']['after_request']
+            after_request = namedAny(after_request)
+            app.after_request(after_request)
+
     def _get_app(self):
+
         if self._app_cache: return self._app_cache
         ## set flask specific things that are non-optional
         error = lambda k: 'Fatal: You need to specify a "flask" section ' + \
                 'with an entry like  "'+k+'=..." in your .ini file'
         try: app_name = self['flask']['app']
         except KeyError: raise SettingsError(error('app'))
-        try: secret_key = str(self['flask']['secret_key'])
-        except KeyError: raise SettingsError(error('secret_key'))
+
+
         app = Flask(app_name)
-        app.secret_key = secret_key
+        self._setup_secret_key(app)
 
         ## set flask specific things that are optional
         flask_section = self['flask']
@@ -171,15 +194,9 @@ class FlaskSettings(Dictionaryish):
         if 'template_path' in flask_section:
             raise Exception,'niy'
             app.jinja_loader = FileSystemLoader(self['flask']['template_path'])
-        if 'before_request' in flask_section:
-            before_request = self['flask']['before_request']
-            before_request = namedAny(before_request)
-            app.before_request(before_request)
 
-        if 'after_request' in flask_section:
-            after_request = self['flask']['after_request']
-            after_request = namedAny(after_request)
-            app.after_request(after_request)
+        self._setup_pre_request(app)
+        self._setup_post_request(app)
 
         if 'templates' in corkscrew_section:
             modules = corkscrew_section['templates'].split(',')
@@ -204,7 +221,7 @@ class FlaskSettings(Dictionaryish):
 
     def _setup_views(self, app):
         """ NOTE: at this point app is only partially setup.
-                  (do not attempt to use the app @property here)
+            (do not attempt to use the app @property here)
         """
         corkscrew_section = self['corkscrew']
         try:
@@ -234,7 +251,8 @@ class FlaskSettings(Dictionaryish):
         class MyConfigParser(configparser.ConfigParser):
             pass
         if not os.path.exists(file):
-            raise SettingsError('ERROR: config file at "{f}" does not exist'.format(f=file))
+            raise SettingsError(
+                'ERROR: config file at "{f}" does not exist'.format(f=file))
         config = config.copy()
         cp = MyConfigParser()
         cp.read(file)
@@ -246,6 +264,7 @@ class FlaskSettings(Dictionaryish):
         user_section = self['user']
         corkscrew_section = self['corkscrew']
         if user_section['runner']:
+            # DEPRECATED..
             runner_dotpath = self['user.runner']
         else:
             try:
@@ -269,12 +288,30 @@ class FlaskSettings(Dictionaryish):
         """
         return dict(app=self.app, settings=self)
 
+    def pre_run(self):
+        """ hook for subclassers.. """
+        pass
+
+    def _setup_debug(self, app):
+        from flask_debugtoolbar import DebugToolbarExtension
+        debug = self['flask']['debug'].lower() in ['1','true']
+        app.debug = debug
+        if debug:
+            report((".ini lists debug as true: "
+                    "this setting will be migrated into flask"
+                    "app & debugtoolbar will be turned on."))
+
+            toolbar = DebugToolbarExtension(app)
+
+        return debug
+
     def run(self, *args, **kargs):
         """ this is a thing that probably does not belong in a
             settings abstraction, but it is very useful.. """
+        self.pre_run()
 
         if self.options.cmd:
-            ns=globals()
+            ns = globals()
             ns.update(settings=self)
             exec self.options.cmd in self.shell_namespace()
             self.done = True
@@ -285,7 +322,8 @@ class FlaskSettings(Dictionaryish):
             try:
                 from IPython import Shell;
             except ImportError:
-                raise SettingsError("You need IPython installed if you want to use the shell.")
+                raise SettingsError("You need IPython installed "
+                                    "if you want to use the shell.")
             else:
                 Shell.IPShellEmbed(argv=['-noconfirm_exit'],
                                    user_ns=self.shell_namespace())()
@@ -295,7 +333,7 @@ class FlaskSettings(Dictionaryish):
             port = int(self['flask']['port'])
             report('running on port: {0}'.format(port))
             host = self['flask']['host']
-            debug = self['flask']['debug'].lower()=='true'
+            debug = self._setup_debug(app)
             runner = self.runner
             runner(app=app, port=port, host=host, debug=debug)
             node = platform.node()

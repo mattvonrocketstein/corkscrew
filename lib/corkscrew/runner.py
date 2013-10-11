@@ -73,7 +73,10 @@ def tornado(app=None, host=None, port=None, debug=None):
         IOLoop.instance().start()
 
 def flask(app=None, host=None, port=None, debug=None):
-    """ the flask default runner """
+    """ the flask default runner.  (which is itself a thin
+        wrapper around stuff in the werkzeug.serving
+        module)
+    """
     return app.run(host=host,
                    port=port,
                    debug=debug)
