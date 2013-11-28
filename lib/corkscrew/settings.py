@@ -35,6 +35,8 @@ class FlaskSettings(Dictionaryish):
     """
 
     default_file = 'corkscrew.ini'
+    jinja_globals = {}
+    jinja_filters = {}
 
     @classmethod
     def get_parser(kls):
@@ -165,6 +167,10 @@ class FlaskSettings(Dictionaryish):
             before_request = namedAny(before_request)
             app.before_request(before_request)
 
+    def _setup_jinja_globals(self, app):
+        app.jinja_env.globals.update(**self.jinja_globals)
+        app.jinja_env.filters.update(**self.jinja_filters)
+
     def _setup_post_request(self, app):
         flask_section = self['flask']
         if 'after_request' in flask_section:
@@ -197,6 +203,7 @@ class FlaskSettings(Dictionaryish):
 
         self._setup_pre_request(app)
         self._setup_post_request(app)
+        self._setup_jinja_globals(app)
 
         if 'templates' in corkscrew_section:
             modules = corkscrew_section['templates'].split(',')
