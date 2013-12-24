@@ -68,11 +68,14 @@ class FlaskView(LazyView):
         """ when instantiated, the view will let the app
              know about it's own urls.
         """
-        super(FlaskView,self).__init__(*args, **kargs)
+        super(FlaskView, self).__init__(*args, **kargs)
 
         ### this from blueprints now, but in the short term might need it for reference
         if self.blueprint is None:
-            raise TypeError,'FlaskView subclass must define a blueprint'
+        #if self.__class__.blueprint is None:
+            self.__class__.blueprint = BluePrint(self.__class__.__name__,
+                                                 self.__class__.__name__)
+            #raise TypeError, 'FlaskView subclass must define a blueprint'
 
     @use_local_template
     def render_error(self, msg):
@@ -96,7 +99,7 @@ class FlaskView(LazyView):
 
     def __str__(self):
         # FIXME HACK
-        out = super(FlaskView,self).__str__()
+        out = super(FlaskView, self).__str__()
         out = out.split('object at')[0].strip()
         return out+'>'
 
@@ -151,7 +154,7 @@ View = FlaskView
 class SmartView(View):
     """ smartviews are ones that might have their own
         templates embedded in docstrings.  (yes, i know
-        you think this is a terrible idea, i dont care)
+        you think this is a terrible idea.. dont care)
     """
     pass
 
@@ -212,3 +215,60 @@ class FourOhFourView(LazyView):
         @self.app.errorhandler(404)
         def not_found(error):
             return self.render(), 404
+
+class SijaxView(View):
+
+    @property
+    def sijax(self):
+        from flask import g
+        return g.sijax
+
+    @property
+    def is_sijax(self):
+        return self.sijax.is_sijax_request
+
+    def install_into_app(self, app):
+        import flask_sijax
+        flask_sijax.route(self.app, self.url)(self.main)
+        return []
+
+class SijaxDemo(SijaxView):
+
+    url = '/comet'
+
+    def comet_do_work_handler(self, obj_response, sleep_time):
+        import time
+        for i in range(6):
+            width = '%spx' % (i * 80)
+            obj_response.css('#progress', 'width', width)
+            obj_response.html('#progress', "x-"+str(i))
+            # Yielding tells Sijax to flush the data to the browser.
+            # This only works for Streaming functions (Comet or Upload)
+            # and would not work for normal Sijax functions
+            yield obj_response
+            if i != 5:
+                time.sleep(sleep_time)
+
+    @use_local_template
+    def main(self):
+        """
+        <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.5.1/jquery.min.js"></script>
+        <script type="text/javascript" src="/static/js/sijax/sijax.js"></script>
+        <script type="text/javascript" src="/static/js/sijax/sijax_comet.js"></script>
+        <script type="text/javascript">{{ g.sijax.get_js()|safe }}</script>
+        <pre>{{g.sijax.get_js()}}</pre>
+        <div id="progressWrapper"><div id="progress" style=""></div></div>
+        <button id="btnStart">Start</button>
+        <script type="text/javascript">
+        $('#btnStart').bind('click', function () {
+            $('#progress').css('width', 0).html('&nbsp;');
+            sjxComet.request('do_work', [1]);});
+        </script>
+        """
+        if self.is_sijax:
+            # The request looks like a valid Sijax request
+            # Let's register the handlers and tell Sijax to process it
+            self.sijax.register_comet_callback('do_work', self.comet_do_work_handler)
+            out = self.sijax.process_request()
+            return out
+        return dict()
