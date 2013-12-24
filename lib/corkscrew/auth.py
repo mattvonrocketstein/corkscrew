@@ -16,7 +16,7 @@ class AuthCommon(View):
     def auth_redirect(self):
         _next = self['next'] or request.referrer
         if not _next or self.url in _next:
-            _next = self%'corkscrew.default_auth_next'
+            _next = self.settings['corkscrew']['default_auth_next']
         return redirect(_next)
 
 class Logout(AuthCommon):

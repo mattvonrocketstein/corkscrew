@@ -5,3 +5,4 @@ configparser
 Flask-AutoIndex
 flask-debugtoolbar
 git+git://github.com/mattvonrocketstein/reporting.git#egg=reporting
+flask_sijax
