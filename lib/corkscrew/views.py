@@ -69,13 +69,10 @@ class FlaskView(LazyView):
              know about it's own urls.
         """
         super(FlaskView, self).__init__(*args, **kargs)
-
         ### this from blueprints now, but in the short term might need it for reference
         if self.blueprint is None:
-        #if self.__class__.blueprint is None:
-            self.__class__.blueprint = BluePrint(self.__class__.__name__,
-                                                 self.__class__.__name__)
-            #raise TypeError, 'FlaskView subclass must define a blueprint'
+            self.__class__.blueprint = BluePrint(
+                self.__class__.__name__, self.__class__.__name__)
 
     @use_local_template
     def render_error(self, msg):
