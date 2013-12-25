@@ -5,4 +5,5 @@ configparser
 Flask-AutoIndex
 flask-debugtoolbar
 git+git://github.com/mattvonrocketstein/reporting.git#egg=reporting
+git+git://github.com/mattvonrocketstein/goulash.git#egg=goulash
 flask_sijax
