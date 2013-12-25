@@ -9,10 +9,13 @@ import flask
 from flask import abort
 from flask import render_template
 from flask import request, jsonify, g, redirect
+from flask import render_template_string
+
 from report import report
 
 from corkscrew.blueprint import BluePrint
 from corkscrew.util import use_local_template
+
 
 class LazyView(object):
     abort = abort
@@ -37,9 +40,26 @@ class LazyView(object):
     def install_into_app(self, *args, **kargs):
         return []
 
-    def render_template(self, **kargs):
-        """ shortcut that knows about this ``template`` class-var """
+    def get_ctx(self, **kargs):
         kargs.update(authenticated = self.authorized)
+        # setup extra scripts
+        extra_scripts = kargs.pop('extra_scripts', [])
+        extra_scripts+= getattr(self,'extra_scripts',[])
+        kargs['extra_scripts'] = extra_scripts
+        # setup extra javascript
+        javascript = kargs.pop('javascript', '')
+        if hasattr(self, 'javascript') and \
+           isinstance(self.javascript,basestring):
+            javascript+='\n'+self.javascript
+        kargs['javascript'] = javascript
+        return kargs
+
+    def render_template(self,*args, **kargs):
+        """ shortcut that knows about this ``template`` class-var """
+        kargs = self.get_ctx(**kargs)
+        if args:
+            assert len(args)==1 and isinstance(args[0], basestring)
+            return render_template_string(args[0], **kargs)
         try:
             return render_template(self.template, **kargs)
         except jinja2.exceptions.TemplateNotFound:
@@ -134,7 +154,7 @@ class FlaskView(LazyView):
             proxy accessor for the current requests values
         """
         try:
-            return request.values.get(k, None)
+            return self.request_data.values.get(k, None)
         except AttributeError:
             # when this happens from, say, a shell, the
             # LocalProxy for the request will malfunction
@@ -154,8 +174,6 @@ class SmartView(View):
         you think this is a terrible idea.. dont care)
     """
     pass
-
-from .favicon import Favicon
 
 class SettingsView(View):
     url = '/__settings__'
@@ -213,59 +231,5 @@ class FourOhFourView(LazyView):
         def not_found(error):
             return self.render(), 404
 
-class SijaxView(View):
-
-    @property
-    def sijax(self):
-        from flask import g
-        return g.sijax
-
-    @property
-    def is_sijax(self):
-        return self.sijax.is_sijax_request
-
-    def install_into_app(self, app):
-        import flask_sijax
-        flask_sijax.route(self.app, self.url)(self.main)
-        return []
-
-class SijaxDemo(SijaxView):
-
-    url = '/comet'
-
-    def comet_do_work_handler(self, obj_response, sleep_time):
-        import time
-        for i in range(6):
-            width = '%spx' % (i * 80)
-            obj_response.css('#progress', 'width', width)
-            obj_response.html('#progress', "x-"+str(i))
-            # Yielding tells Sijax to flush the data to the browser.
-            # This only works for Streaming functions (Comet or Upload)
-            # and would not work for normal Sijax functions
-            yield obj_response
-            if i != 5:
-                time.sleep(sleep_time)
-
-    @use_local_template
-    def main(self):
-        """
-        <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.5.1/jquery.min.js"></script>
-        <script type="text/javascript" src="/static/js/sijax/sijax.js"></script>
-        <script type="text/javascript" src="/static/js/sijax/sijax_comet.js"></script>
-        <script type="text/javascript">{{ g.sijax.get_js()|safe }}</script>
-        <pre>{{g.sijax.get_js()}}</pre>
-        <div id="progressWrapper"><div id="progress" style=""></div></div>
-        <button id="btnStart">Start</button>
-        <script type="text/javascript">
-        $('#btnStart').bind('click', function () {
-            $('#progress').css('width', 0).html('&nbsp;');
-            sjxComet.request('do_work', [1]);});
-        </script>
-        """
-        if self.is_sijax:
-            # The request looks like a valid Sijax request
-            # Let's register the handlers and tell Sijax to process it
-            self.sijax.register_comet_callback('do_work', self.comet_do_work_handler)
-            out = self.sijax.process_request()
-            return out
-        return dict()
+from corkscrew.favicon import Favicon
+from corkscrew.comet import CometWorker

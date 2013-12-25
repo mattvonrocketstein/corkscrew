@@ -18,11 +18,17 @@ def use_local_template(func):
               return dict(this_context_will_be_used='to render the template')
     """
     def fxn(*args, **kargs):
-        context = func(*args, **kargs)
-        if not isinstance(context, dict):
-            report("use_local_template does not return a dictionary.. passing it thru")
-            return context
-        template = '{%extends "layout.html" %}{%block body%}<center>' + \
-                   func.__doc__ + '</center>{%endblock%}'
+        old = func(*args, **kargs)
+        self = list(args).pop(0)
+        context = self.get_ctx()
+        if not isinstance(old, dict):
+            # it might be a redirect or something
+            report("use_local_template does not return a dictionary.. passing it thru",
+                   context)
+            return old
+        else:
+            context = context.update(**old)
+        template = '{%extends "layout.html" %}{%block body%}' + \
+                   func.__doc__ + '{%endblock%}'
         return render_template_string(template, **context)
     return fxn
