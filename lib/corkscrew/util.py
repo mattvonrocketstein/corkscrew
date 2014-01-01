@@ -20,14 +20,16 @@ def use_local_template(func):
     def fxn(*args, **kargs):
         old = func(*args, **kargs)
         self = list(args).pop(0)
-        context = self.get_ctx()
+        get_ctx = getattr(self, 'get_ctx', lambda: {})
+        context = get_ctx()
+        assert isinstance(context,dict), "get_ctx should return a dictionary"
         if not isinstance(old, dict):
             # it might be a redirect or something
             report("use_local_template does not return a dictionary.. passing it thru",
                    context)
             return old
         else:
-            context = context.update(**old)
+            context.update(old)
         template = '{%extends "layout.html" %}{%block body%}' + \
                    func.__doc__ + '{%endblock%}'
         return render_template_string(template, **context)
