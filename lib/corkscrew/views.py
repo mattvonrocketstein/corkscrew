@@ -154,7 +154,7 @@ class FlaskView(LazyView):
             proxy accessor for the current requests values
         """
         try:
-            return self.request_data.values.get(k, None)
+            return self.request.values.get(k, None)
         except AttributeError:
             # when this happens from, say, a shell, the
             # LocalProxy for the request will malfunction
