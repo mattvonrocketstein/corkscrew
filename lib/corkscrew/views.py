@@ -52,11 +52,13 @@ class LazyView(object):
            isinstance(self.javascript,basestring):
             javascript+='\n'+self.javascript
         kargs['javascript'] = javascript
+        kargs['__view__'] = self
         return kargs
 
     def render_template(self,*args, **kargs):
         """ shortcut that knows about this ``template`` class-var """
-        kargs = self.get_ctx(**kargs)
+        standard_ctx = self.get_ctx()
+        kargs.update(standard_ctx)
         if args:
             assert len(args)==1 and isinstance(args[0], basestring)
             return render_template_string(args[0], **kargs)
