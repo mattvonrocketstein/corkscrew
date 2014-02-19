@@ -8,6 +8,7 @@ import platform
 import importlib
 import configparser
 
+import flask_sijax
 from flask import Flask, url_for
 from jinja2 import FileSystemLoader
 from werkzeug import check_password_hash, generate_password_hash
@@ -171,6 +172,13 @@ class FlaskSettings(Dictionaryish):
         app.jinja_env.globals.update(**self.jinja_globals)
         app.jinja_env.filters.update(**self.jinja_filters)
 
+    def _setup_sijax(self, app):
+        ssp = os.path.join(app.static_folder, 'js', 'sijax')
+        app.config['SIJAX_STATIC_PATH'] = ssp
+        assert os.path.exists(ssp)
+        app.config["SIJAX_JSON_URI"] = '/static/js/sijax/json2.js'
+        flask_sijax.Sijax(app)
+
     def _setup_post_request(self, app):
         flask_section = self['flask']
         if 'after_request' in flask_section:
@@ -179,7 +187,6 @@ class FlaskSettings(Dictionaryish):
             app.after_request(after_request)
 
     def _get_app(self):
-
         if self._app_cache: return self._app_cache
         ## set flask specific things that are non-optional
         error = lambda k: 'Fatal: You need to specify a "flask" section ' + \
@@ -204,6 +211,7 @@ class FlaskSettings(Dictionaryish):
         self._setup_pre_request(app)
         self._setup_post_request(app)
         self._setup_jinja_globals(app)
+        self._setup_sijax(app)
 
         if 'templates' in corkscrew_section:
             modules = corkscrew_section['templates'].split(',')
