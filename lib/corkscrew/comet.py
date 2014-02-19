@@ -31,7 +31,8 @@ class SijaxView(View):
 class CometWorker(SijaxView):
     """ to use this class, simply"""
     extra_scripts = [ '/static/js/sijax/sijax.js',
-                      '/static/js/sijax/sijax_comet.js' ]
+                      '/static/js/sijax/sijax_comet.js',
+                      ]
 
     def __init__(self, *args, **kargs):
         super(CometWorker, self).__init__(*args, **kargs)
@@ -72,6 +73,10 @@ class CometWorker(SijaxView):
         """
         {%extends "layout.html" %}
         {%block body%}
+        <script type="text/javascript">
+        {{ g.sijax.get_js()|safe }}
+        </script>
+
         <table><tr>
         <td>{%if not autostart%}<button id="btnStart">Start</button>{%endif%}</td>
         <td><img id="loading_icon" src="{{loading_icon}}"></td>
@@ -93,12 +98,13 @@ class CometWorker(SijaxView):
             self.sijax.register_comet_callback('do_work', self.comet_handler)
             out = self.sijax.process_request()
             return out
-        return self.render(
-            CometWorker.main.__doc__,
-            javascript=self.sijax.get_js(),
-            autostart=self['start'],
-            bonk=demjson.encode(self.request_data),
-            loading_icon='/static/img/loading.gif',)
+        else:
+            return self.render(
+                CometWorker.main.__doc__,
+                javascript=self.sijax.get_js(),
+                autostart=self['start'],
+                bonk=demjson.encode(self.request_data),
+                loading_icon='/static/img/loading.gif',)
 
 class SijaxDemo(CometWorker):
 
