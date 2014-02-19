@@ -6,6 +6,7 @@ import demjson
 import threading
 
 from goulash.stdout import ThreadedStdout
+from goulash.ansi import Ansi2HTMLConverter
 
 from corkscrew.views import View
 from corkscrew.util import use_local_template
@@ -40,7 +41,6 @@ class CometWorker(SijaxView):
     def comet_handler(self, obj_response, bonk):
         """ """
         bonk = demjson.decode(bonk)
-        from goulash.ansi import Ansi2HTMLConverter
         conv = Ansi2HTMLConverter(inline=False, escaped=False)
         unansi = conv.convert
         obj_response.html_append('#comet_data', conv.get_style())
