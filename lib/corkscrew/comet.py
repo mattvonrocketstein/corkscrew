@@ -87,7 +87,7 @@ class CometWorker(SijaxView):
         {%if not autostart%}
         $('#btnStart').bind('click', function(){sjxComet.request('do_work', [bonk]);});
         {%else%}
-        $(document).ready(function(){sjxComet.request('do_work');});
+        $(document).ready(function(){sjxComet.request('do_work', [bonk]);});
         {%endif%}
         $('#loading_icon').hide();
         </script>
