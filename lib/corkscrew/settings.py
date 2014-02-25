@@ -205,14 +205,14 @@ class FlaskSettings(Dictionaryish):
         self._parse_autoindex(app)
 
         if 'template_path' in flask_section:
-            raise Exception,'niy'
-            app.jinja_loader = FileSystemLoader(self['flask']['template_path'])
+            raise Exception,'deprecated'
 
         self._setup_pre_request(app)
         self._setup_post_request(app)
         self._setup_jinja_globals(app)
         self._setup_sijax(app)
-
+        jinja_options = dict(app.jinja_options).copy()
+        jinja_options['extensions'] += ['jinja2.ext.loopcontrols']
         if 'templates' in corkscrew_section:
             modules = corkscrew_section['templates'].split(',')
             for module in modules:
@@ -224,6 +224,7 @@ class FlaskSettings(Dictionaryish):
                     if tdir not in app.jinja_loader.searchpath:
                         report('adding {t} to templates search',t=tdir)
                         app.jinja_loader.searchpath += [tdir]
+
         else:
             report("WARNING! 'templates' entry not found in corkscrew section")
 
