@@ -6,6 +6,7 @@ from flask.ext.silk import Silk
 from flask.ext.autoindex import AutoIndex, RootDirectory
 from corkscrew.views import FlaskView
 from corkscrew.util import isdir, ope
+
 def _install_index(app, filepath, url):
     kargs = dict(add_url_rules=False)
     idx   = AutoIndex(app, filepath, **kargs)
@@ -22,6 +23,7 @@ def DirView(app=None, settings=None, **kargs):
     autoindex_cfg = flask_section['autoindex']
     autoindex_cfg = demjson.decode(autoindex_cfg)
     for url, filepath in autoindex_cfg.items():
+        filepath = os.path.expanduser(filepath)
         msg = "creating browse for file://{0} under http @ {1}".format(filepath, url)
         FlaskView.report(msg)
         checks = [
