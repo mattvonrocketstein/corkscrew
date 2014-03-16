@@ -159,8 +159,8 @@ class FlaskView(LazyView):
             return self.request.values.get(k, None)
         except AttributeError:
             # when this happens from, say, a shell, the
-            # LocalProxy for the request will malfunction
-            # and that is unavoidable
+            # LocalProxy for the request will malfunction,
+            # seems unavoidable
             return None
 
     @property
@@ -235,3 +235,4 @@ class FourOhFourView(LazyView):
 
 from corkscrew.favicon import Favicon
 from corkscrew.comet import CometWorker
+from corkscrew.proxy import ProxyView
