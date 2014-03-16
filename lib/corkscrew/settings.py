@@ -175,7 +175,7 @@ class FlaskSettings(Dictionaryish):
     def _setup_sijax(self, app):
         ssp = os.path.join(app.static_folder, 'js', 'sijax')
         app.config['SIJAX_STATIC_PATH'] = ssp
-        assert os.path.exists(ssp)
+        assert os.path.exists(ssp),"SIJAX_STATIC_PATH@'{0}' does not exist".format(ssp)
         app.config["SIJAX_JSON_URI"] = '/static/js/sijax/json2.js'
         flask_sijax.Sijax(app)
 
