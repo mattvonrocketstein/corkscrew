@@ -14,12 +14,10 @@ from jinja2 import FileSystemLoader
 from werkzeug import check_password_hash, generate_password_hash
 
 import report as reporting
-from corkscrew.reflect import namedAny
+from corkscrew.exceptions import SettingsError
+from corkscrew import core
 
 report = reporting.getReporter(label=False)
-
-class SettingsError(Exception):
-    pass
 
 class Dictionaryish(object):
     def __contains__(self, other):
@@ -161,30 +159,15 @@ class FlaskSettings(Dictionaryish):
         except KeyError: raise SettingsError(error('secret_key'))
         app.secret_key = secret_key
 
-    def _setup_pre_request(self, app):
-        flask_section = self['flask']
-        if 'before_request' in flask_section:
-            before_request = self['flask']['before_request']
-            before_request = namedAny(before_request)
-            app.before_request(before_request)
-
-    def _setup_jinja_globals(self, app):
-        app.jinja_env.globals.update(**self.jinja_globals)
-        app.jinja_env.filters.update(**self.jinja_filters)
-
     def _setup_sijax(self, app):
         ssp = os.path.join(app.static_folder, 'js', 'sijax')
         app.config['SIJAX_STATIC_PATH'] = ssp
         assert os.path.exists(ssp),"SIJAX_STATIC_PATH@'{0}' does not exist".format(ssp)
         app.config["SIJAX_JSON_URI"] = '/static/js/sijax/json2.js'
+        report("sijax settings: \n  {0}".format(
+            dict(SIJAX_STATIC_PATH=app.config['SIJAX_STATIC_PATH'],
+                 SIJAX_JSON_URI = app.config['SIJAX_JSON_URI'])))
         flask_sijax.Sijax(app)
-
-    def _setup_post_request(self, app):
-        flask_section = self['flask']
-        if 'after_request' in flask_section:
-            after_request = self['flask']['after_request']
-            after_request = namedAny(after_request)
-            app.after_request(after_request)
 
     def _get_app(self):
         if self._app_cache: return self._app_cache
@@ -207,9 +190,9 @@ class FlaskSettings(Dictionaryish):
         if 'template_path' in flask_section:
             raise Exception,'deprecated'
 
-        self._setup_pre_request(app)
-        self._setup_post_request(app)
-        self._setup_jinja_globals(app)
+        core._setup_pre_request(self, app)
+        core._setup_post_request(self, app)
+        core._setup_jinja_globals(self, app)
         self._setup_sijax(app)
         jinja_options = dict(app.jinja_options).copy()
         jinja_options['extensions'] += ['jinja2.ext.loopcontrols']
@@ -229,36 +212,11 @@ class FlaskSettings(Dictionaryish):
             report("WARNING! 'templates' entry not found in corkscrew section")
 
         ## setup views
-        self._installed_views = self._setup_views(app)
+        self._installed_views = core._setup_views(self, app)
         #report('built urls: {u}',u=[v.url for v in views])
         reporting.console.draw_line()
         self._app_cache = app
         return app
-
-    def _setup_views(self, app):
-        """ NOTE: at this point app is only partially setup.
-            (do not attempt to use the app @property here)
-        """
-        corkscrew_section = self['corkscrew']
-        try:
-            view_holder = corkscrew_section['views']
-        except KeyError:
-            error = ('Fatal: could not find "view=<dotpath>" entry in the'
-                     '[corkscrew] section of your .ini file')
-            raise SettingsError(error)
-        else:
-            view_list = namedAny(view_holder)
-            view_instances = []
-            for v in view_list:
-                try:
-                    view_instances.append(v(app=app, settings=self))
-                except Exception, e:
-                    report('error working with view: '+str(v))
-                    raise
-            for v in view_instances:
-                sub_views = v.install_into_app(app)
-                view_instances += sub_views
-            return view_instances
 
     def load(self, file, config={}):
         """ returns a dictionary with key's of the form
@@ -290,7 +248,7 @@ class FlaskSettings(Dictionaryish):
                 warnings.warn(warning)
                 runner_dotpath = 'corkscrew.runner.naive_runner'
         try:
-            runner = namedAny(runner_dotpath)
+            runner = core.namedAny(runner_dotpath)
         except AttributeError:
             err="Could not find runner specified by dotpath: "+runner_dotpath
             raise AttributeError,err
