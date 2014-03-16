@@ -88,7 +88,7 @@ class FlaskView(LazyView):
 
     def __init__(self, *args, **kargs):
         """ when instantiated, the view will let the app
-             know about it's own urls.
+            know about it's own urls.
         """
         super(FlaskView, self).__init__(*args, **kargs)
         ### this from blueprints now, but in the short term might need it for reference
@@ -124,7 +124,7 @@ class FlaskView(LazyView):
 
     def __call__(self):
         """ 1) honor ``requires_auth`` class var and
-               redirects to login if necessary.
+            redirects to login if necessary.
             2) honor ``returns_json`` class var and
                jsonify what is assumed to be a dictionary.
             3) dispatch based on get/post maybe ?
@@ -236,3 +236,13 @@ class FourOhFourView(LazyView):
 from corkscrew.favicon import Favicon
 from corkscrew.comet import CometWorker
 from corkscrew.proxy import ProxyView
+
+class FlaskMetaView(LazyView):
+    def install_into_app(self, app):
+        """"""
+        out=[]
+        for View in self.subviews:
+            view = View(app=app, settings=self.settings)
+            view.install_into_app(app)
+            out.append(view)
+        return out
