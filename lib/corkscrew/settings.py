@@ -177,8 +177,10 @@ class FlaskSettings(Dictionaryish):
         try: app_name = self['flask']['app']
         except KeyError: raise SettingsError(error('app'))
 
+        try: static_folder = os.path.expanduser(self['flask']['static_folder'])
+        except KeyError: static_folder = 'static'
 
-        app = Flask(app_name)
+        app = Flask(app_name, static_folder=static_folder)
         self._setup_secret_key(app)
 
         ## set flask specific things that are optional

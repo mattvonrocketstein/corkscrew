@@ -1,0 +1,62 @@
+{#lib/corkscrew/templates/corkscrew_layout.html#}
+<html>
+  <title>{% block page_title %}corkscrew page_title block{% endblock %}</title>
+  {%include "corkscrew_base_style_and_js.html" %}
+  <body>
+    <div id="basic-modal-content">
+      {%block modal_content%}
+      <center>modal content is empty by default</center>
+      {%endblock%}
+    </div>
+
+    <div class="page container" style="background:white">
+      <h1 class="remove-bottom" style="margin-top:10px">&nbsp;{%block body_title%}corkscrew body_title{%endblock%}</h1>
+
+      <div id=main_navigation style="margin-bottom:50px;width:100%"></div>
+      {% with flashes = get_flashed_messages() %}
+      <ul class=flashes>
+        {% if flashes %}
+        {% for message in flashes %}
+        <li>{{ message }}</li>
+        {% endfor %}
+        {% endif %}
+      </ul>
+      {% endwith %}
+      <div style="margin-right:10px;margin-left:10px">
+        {%block main_menu %}{%endblock%}
+        {%block body %}{%endblock%}
+      </div>
+      <div class=footer>
+        <table style="margin-top:50px;" width=100%>
+          <tr>
+            <td align=left>
+              <small>
+                {%block footer_left%}
+                this is the site footer, left
+                {%endblock%}
+              </small>
+            </td>
+            <td align=right>
+              {%block footer_right%}
+              this is the site footer, right
+              {%endblock%}
+            </td>
+          </tr>
+        </table>
+      </div>
+    </div>
+
+    <script type="text/javascript">
+      $(document).ready(function() {
+      $(".item_list tr:odd").addClass("odd");
+      $('#main_navigation').load('/_nav',{_:'{{_}}'},
+      function(){});
+
+      //window.setTimeout(function(){
+      //console.debug('timer up.. init anylink');
+      //anylinkmenu.trueinit("menuanchorclass");}, 3500);
+
+      });
+    </script>
+  </body>
+</html>

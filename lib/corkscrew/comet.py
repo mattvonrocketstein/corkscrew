@@ -73,6 +73,7 @@ class CometWorker(SijaxView):
         """
         {%extends "layout.html" %}
         {%block body%}
+        {{extra_html|safe}}
         <script type="text/javascript">
         {{ g.sijax.get_js()|safe }}
         </script>
@@ -99,11 +100,14 @@ class CometWorker(SijaxView):
             out = self.sijax.process_request()
             return out
         else:
+            extra_html = getattr(self,'extra_html','')
+            if callable(extra_html): extra_html = extra_html()
             return self.render(
                 CometWorker.main.__doc__,
+                extra_html=extra_html,
                 javascript=self.sijax.get_js(),
                 autostart=self['start'],
-                bonk=demjson.encode(self.request_data),
+                bonk = demjson.encode(self.request_data),
                 loading_icon='/static/img/loading.gif',)
 
 class SijaxDemo(CometWorker):
