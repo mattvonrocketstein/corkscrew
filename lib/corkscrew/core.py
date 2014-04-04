@@ -2,6 +2,7 @@
 """
 
 from corkscrew.reflect import namedAny
+from corkscrew.exceptions import SettingsError
 
 def _setup_pre_request(settings, app):
     flask_section = settings['flask']
@@ -10,7 +11,6 @@ def _setup_pre_request(settings, app):
         before_request = namedAny(before_request)
         app.before_request(before_request)
 
-#def _setup_view(settings,app):
 def _setup_views(settings, app):
     """ NOTE: at this point app is only partially setup.
         (do not attempt to use the app @property here)
@@ -19,7 +19,7 @@ def _setup_views(settings, app):
     try:
         view_holder = corkscrew_section['views']
     except KeyError:
-        error = ('Fatal: could not find "view=<dotpath>" entry in the'
+        error = ('Fatal: could not find "views=<dotpath>" entry in the'
                  '[corkscrew] section of your .ini file')
         raise SettingsError(error)
     else:

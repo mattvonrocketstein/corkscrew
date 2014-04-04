@@ -1,0 +1,20 @@
+{#lib/corkscrew/templates/base_style_and_js.html#}
+{%block base_style_and_js%}
+<script type="text/javascript" src="/static/js/anylink/anylinkmenu.js"></script>
+<link rel="stylesheet" type="text/css" href="/static/js/anylink/anylinkmenu.css" />
+<link rel="stylesheet" type="text/css" href="{{url_for('static', filename='jquery-ui.css')}}">
+<link type='text/css' href='/static/modal.css' rel='stylesheet' media='screen' />
+<script src="/static/js/jquery.min.js"></script> {#1.5.2#}
+<script src="/static/js/jquery.simplemodal.js"></script> {#1.4.4#}
+<script src="/static/js/jquery-ui.min.js"></script> {#1.8.12#}
+<script src="/static/js/jquery.redirect.min.js"></script>
+{#script type="text/javascript" src="/static/js/prettyprint.js">#}
+<script>{%include "js/prettyprint.js" %}</script>
+
+{% for script_src in extra_scripts %}
+<script type="text/javascript" src="{{script_src}}"></script>
+{%endfor%}
+<script type="text/javascript">{{javascript|safe}}</script>
+<style>{%include "corkscrew_base_style.css"%}</style>
+<script>{%include "javascript/corkscrew_base.js"%}</script>
+{%endblock%}
