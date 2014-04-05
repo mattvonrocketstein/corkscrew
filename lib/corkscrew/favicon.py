@@ -2,13 +2,12 @@
 
 import os
 from flask import send_from_directory
-from .views import FlaskView, BluePrint
+from .views import FlaskView
 
 
 class Favicon(FlaskView):
     """ TODO: change to use settings  """
     url = '/favicon.ico'
-    #blueprint = BluePrint('favicon', __name__)
     def main(self):
         return send_from_directory(
             os.path.join(self.app.root_path, 'static'),
