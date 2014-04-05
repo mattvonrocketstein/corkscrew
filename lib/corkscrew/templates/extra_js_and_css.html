@@ -1,0 +1,7 @@
+{% for script_src in extra_css %}
+<link rel="stylesheet" type="text/css" href="{{script_src}}" />
+{%endfor%}
+{% for script_src in extra_scripts %}
+<script type="text/javascript" src="{{script_src}}"></script>
+{%endfor%}
+<script type="text/javascript">{{javascript|safe}}</script>

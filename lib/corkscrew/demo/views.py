@@ -1,18 +1,25 @@
 """ corkscrew.demo.views
 """
 
-from corkscrew.views import FlaskView, use_local_template
+from collections import OrderedDict
 
-class Home(FlaskView):
+from corkscrew.views import View
+from corkscrew.comet import SijaxDemo
+from corkscrew.views.meta import ListViews, SettingsView
+
+class Home(View):
     url = '/'
 
-    @use_local_template
+    @View.use_local_template
     def main(self):
         """
         <strong>various demos</strong>
         <table style="margin-left:15px">
             {% for k,v in demos.items()%}
-            <tr><td><b><a href="{{k}}">{{k}}</a></b></td><td><{{v}}</a></td></tr>
+            <tr>
+            <td><b><a href="{{k}}">{{k}}</a></b></td>
+            <td>{{v}}</td>
+            </tr>
             {%endfor%}
         </table><hr>
         <strong>app metatdata</strong>
@@ -22,40 +29,38 @@ class Home(FlaskView):
             {%endfor%}
         </table><hr>
         """
-        #from IPython import Shell; Shell.IPShellEmbed(argv=['-noconfirm_exit'])()
         return dict(
-            demos={
-                '/comet':'comet demo (via sijax)',
-                '/json_editor':'json editor',
-                },
+            demos=OrderedDict(
+                [ ['/comet','comet demo (via sijax)'],
+                  ['/json_editor','json editor'],
+                  ['/__views__' , 'views in this runtime'],
+                  ['/__settings__' , 'settings in this runtime'],
+                  ]),
             app_metadata=dict(
                 static_folder=self.app.static_folder,
                 jinja_env_globals=self.app.jinja_env.globals.keys(),
                 rootpath=self.app.root_path))
 
-class JSONEdit(FlaskView):
-    url = '/json_editor'
 
-    @use_local_template
-    def main(self):
-        """
-        <script src="/static/js/json2.js"></script>
-        <script src="/static/js/jquery.min.js"></script>
-        <script src="/static/js/jquery.jsoneditor.js"></script>
-        <script src="/static/js/jsoneditor.js"></script>
-        <link rel="stylesheet" href="/static/css/jsoneditor.css"/>
-        <a href=# id="expander">Expand all</a>
-        <table border=1 width=100%>
-        <tr>
-        <td><div id="editor" class="json-editor"></div></td>
-        <td><textarea id="json"></textarea></td>
-        </tr>
-        </table>
-        """
-        return dict()
-from corkscrew.comet import SijaxDemo
+
+from corkscrew.views import JSONEdit
+import demjson
+class DemoJSONEdit(JSONEdit):
+    def get_json(self):
+        return demjson.encode(
+            dict(string= "foo",
+                 number= 5,
+                 array= [1, 2, 3],
+                 object= dict(
+                     property="value",
+                     subobj = dict(
+                         arr=["foo", "ha"],
+                         numero= 1))))
+
 __views__ = [
     Home,
-    JSONEdit,
-    SijaxDemo
+    DemoJSONEdit,
+    SijaxDemo,
+    type('DemoListView', (ListViews,), dict(requires_auth=False)),
+    type('DemoSettingsView', (SettingsView,), dict(requires_auth=False)),
     ]

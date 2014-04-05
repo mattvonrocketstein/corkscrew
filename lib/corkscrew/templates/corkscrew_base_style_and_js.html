@@ -8,13 +8,9 @@
 <script src="/static/js/jquery.simplemodal.js"></script> {#1.4.4#}
 <script src="/static/js/jquery-ui.min.js"></script> {#1.8.12#}
 <script src="/static/js/jquery.redirect.min.js"></script>
-{#script type="text/javascript" src="/static/js/prettyprint.js">#}
-<script>{%include "js/prettyprint.js" %}</script>
+<script type="text/javascript" src="/static/js/prettyprint.js"></script>
 
-{% for script_src in extra_scripts %}
-<script type="text/javascript" src="{{script_src}}"></script>
-{%endfor%}
-<script type="text/javascript">{{javascript|safe}}</script>
+{%include "extra_js_and_css.html"%}
 <style>{%include "corkscrew_base_style.css"%}</style>
 <script>{%include "javascript/corkscrew_base.js"%}</script>
 {%endblock%}
