@@ -37,4 +37,4 @@ class BluePrint(_Blueprint):
         except ImportError,e:
             # nonstandard init like --shell, etc
             report("squashing import error: "+str(e))
-            super(BluePrint,self).__init__(str(uuid.uuid1()),__name__)
+            super(BluePrint,self).__init__(str(uuid.uuid4()),__name__)

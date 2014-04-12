@@ -1,6 +1,7 @@
-"""
+""" corkscrew.views._404
 """
 from .lazy import LazyView
+
 class FourOhFourView(LazyView):
 
     template = 'page_not_found.html'

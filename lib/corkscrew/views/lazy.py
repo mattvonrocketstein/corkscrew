@@ -37,12 +37,12 @@ class LazyView(object):
         kargs.update(authenticated = self.authorized)
         # setup extra scripts
         extra_scripts = kargs.pop('extra_scripts', [])
-        extra_scripts+= getattr(self,'extra_scripts',[])
+        extra_scripts += getattr(self, 'extra_scripts', [])
         kargs['extra_scripts'] = extra_scripts
         # setup extra javascript
         javascript = kargs.pop('javascript', '')
         if hasattr(self, 'javascript') and \
-           isinstance(self.javascript,basestring):
+           isinstance(self.javascript, basestring):
             javascript+='\n'+self.javascript
         kargs['javascript'] = javascript
         kargs['__view__'] = self
@@ -53,8 +53,9 @@ class LazyView(object):
 
     def render_template(self,*args, **kargs):
         """ shortcut that knows about this ``template`` class-var. """
-        standard_ctx = self.get_ctx()
-        kargs.update(standard_ctx)
+        tmp = self.get_ctx()
+        tmp.update(kargs)
+        kargs = tmp
         if args:
             assert len(args)==1 and isinstance(args[0], basestring)
             return render_template_string(args[0], **kargs)
