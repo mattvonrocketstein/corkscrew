@@ -1,44 +1,38 @@
 .odd {
-   background: #ccc;
+    background: #ccc;
 }
-.rounded-corner
+.nav_table
 {
-        width: 480px;
-        text-align: left;
-        border-collapse: collapse;
+    margin-left:15px;
+    width: 480px;
+    text-align: left;
+    border-collapse: collapse;
 }
-.rounded-corner thead th.rounded-company{
-        background: #b9c9fe url('/static/img/table-images/left.png') left -1px no-repeat;
+.nav_table thead th.rounded-company{
+    background: #b9c9fe url('/static/img/table-images/left.png') left -1px no-repeat;
 }
-.rounded-corner thead th.rounded-q4{
-        background: #b9c9fe url('/static/img/table-images/right.png') right -1px no-repeat;
+.nav_table thead th.rounded-q4{
+    background: #b9c9fe url('/static/img/table-images/right.png') right -1px no-repeat;
 }
-.rounded-corner th
-{
-
-        font-weight: normal;
-        font-size: 13px;
-        color: #039;
-        background: #b9c9fe;
+.nav_table th {
+    font-weight: normal;
+    font-size: 13px;
+    color: #039;
+    background: #b9c9fe;
 }
-.rounded-corner td
-{
-
-        background: #e8edff;
-        border-top: 1px solid #fff;
-        color: #669;
+.nav_table td {
+    background: #e8edff;
+    border-top: 1px solid #fff;
+    color: #669;
 }
-.rounded-corner tfoot td.rounded-foot-left
-{
-        background: #e8edff url('/static/img/table-images/botleft.png') left bottom no-repeat;
+.nav_table tfoot td.rounded-foot-left{
+    background: #e8edff url('/static/img/table-images/botleft.png') left bottom no-repeat;
 }
-.rounded-corner tfoot td.rounded-foot-right
-{
-        background: #e8edff url('/static/img/table-images/botright.png') right bottom no-repeat;
+.nav_table tfoot td.rounded-foot-right{
+    background: #e8edff url('/static/img/table-images/botright.png') right bottom no-repeat;
 }
-.rounded-corner tbody tr:hover td
-{
-        background: #d0dafd;
+.nav_table tbody tr:hover td{
+    background: #d0dafd;
 }
 
 body {
@@ -84,11 +78,24 @@ div.page {
 
 div.page h1 {
     background:#3D59AB;
-    margin: 0;
+    margin-left: 2px;
     color: white;
     letter-spacing: 1px;
     text-shadow: 0 0 3px #24776F;
     font-weight: normal;
+}
+.blue1{background:#3D59AB;}
+.h1ish {
+    background:#3D59AB;
+    margin-left: 2px;
+    color: white;
+    letter-spacing: 1px;
+    text-shadow: 0 0 3px #24776F;
+    font-weight: normal;
+    font-weight: normal;
+    font-size: 1.5em;
+    line-height: 50px;
+    margin-bottom: 14px;
 }
 
 div.page div.navigation {
@@ -101,6 +108,13 @@ div.page div.navigation {
     letter-spacing: 0.5px;
 }
 
+/*background: #9BC4E2;*/
+    padding: 4px 10px;
+    border-top: 1px solid #ccc;
+    border-bottom: 1px solid #eee;
+    color: #888;
+    font-size: 12px;
+    letter-spacing: 0.5px;}
 div.page div.navigation a {
     color: #444;
     font-weight: bold;

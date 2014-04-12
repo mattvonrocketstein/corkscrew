@@ -67,20 +67,24 @@ class FlaskView(LazyView):
             redirects to login if necessary.
             2) honor ``returns_json`` class var and
                jsonify what is assumed to be a dictionary.
-            3) dispatch based on get/post maybe ?
+            TODO: dispatch based on get/post maybe ?
         """
         if self.requires_auth and not self.authorized:
-            report('view requires authentication..redirecting to login',[self, g.user])
+            msg='view requires authentication..redirecting to login'
+            report(msg, [self, g.user])
             return redirect('/login')
         result = self.main()
         if not result:
-            report("WARNING: null result {0} given from {1}".format(result, self.main))
+            msg = "WARNING: null result {0} given from {1}"
+            msg = msg.format(result, self.main)
+            report(msg)
         if self.returns_json:
             try:
                 result = jsonify(**result)
             except TypeError:
-                raise TypeError(('{0} cannot JSONify "{1}", but '
-                                 ' {0}.returns_json==True').format(self, result))
+                raise TypeError(
+                    ('{0} cannot JSONify "{1}", but '
+                     ' {0}.returns_json==True').format(self, result))
         return result
 
     def __mod__(self, other):

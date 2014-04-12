@@ -4,15 +4,20 @@
   {%include "corkscrew_base_style_and_js.html" %}
   <body>
     <div id="basic-modal-content">
-      {%block modal_content%}
-      <center>modal content is empty by default</center>
-      {%endblock%}
+      {%block modal_content%}<center>modal content is empty by default</center>{%endblock%}
     </div>
 
     <div class="page container" style="background:white">
-      <h1 class="remove-bottom" style="margin-top:10px">&nbsp;{%block body_title%}corkscrew body_title{%endblock%}</h1>
-
-      <div id=main_navigation style="margin-bottom:50px;width:100%"></div>
+      <table class=blue1 style="width:100%">
+        <tr>
+          <td>
+            <span class=h1ish>
+              {%block body_title%}corkscrew body_title{%endblock%}
+          </span></td>
+          <td id=main_navigation valign=bottom>
+          </td>
+        </tr>
+      </table>
       {% with flashes = get_flashed_messages() %}
       <ul class=flashes>
         {% if flashes %}
@@ -22,7 +27,7 @@
         {% endif %}
       </ul>
       {% endwith %}
-      <div style="margin-right:10px;margin-left:10px">
+      <div id=main_body style="margin-right:10px;margin-left:10px">
         {%block main_menu %}{%endblock%}
         {%block body %}{%endblock%}
       </div>
@@ -47,11 +52,14 @@
     </div>
 
     <script type="text/javascript">
+      function load_navigation(){
+        console.debug('loading navigation');
+        $('#main_navigation').load('/_nav');
+      }
       $(document).ready(function() {
       $(".item_list tr:odd").addClass("odd");
-      $('#main_navigation').load('/_nav',{_:'{{_}}'},
-      function(){});
-
+      //$('#main_navigation').load('/_nav',{_:'{{_}}'},function(){});
+      load_navigation();
       //window.setTimeout(function(){
       //console.debug('timer up.. init anylink');
       //anylinkmenu.trueinit("menuanchorclass");}, 3500);
