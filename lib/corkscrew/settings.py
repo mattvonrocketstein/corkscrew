@@ -45,8 +45,8 @@ class FlaskSettings(Dictionaryish):
         parser.set_conflict_handler("resolve")
         parser.add_option(
             "-c", default='',dest='cmd',
-            help="like python -c: \"a program passed in as string (terminates option list)\"")
-
+            help=("like python -c: \"a program passed in"
+                  " as string (terminates option list)\""))
         parser.add_option("--port",  dest="port",
                           default='', help="server listen port")
         parser.add_option("--runner",  dest="runner",
@@ -63,7 +63,7 @@ class FlaskSettings(Dictionaryish):
         return parser
 
     def __mod__(self, other):
-        raise Exception, 'dont use this'
+        raise Exception, 'deprecated'
 
     @property
     def settings_file(self):
@@ -77,8 +77,7 @@ class FlaskSettings(Dictionaryish):
         return _file
 
     def __init__(self, filename=None):
-        """
-            first load the default config so that overrides don't need
+        """ first load the default config so that overrides don't need
             to mention everything.  update default with the config
             specified by the command line optionparser, then
             update that with any other overrides delivered to the parser.
@@ -149,25 +148,6 @@ class FlaskSettings(Dictionaryish):
         else:
             from corkscrew.dir_index import DirView
             return DirView(app=app, settings=self)
-
-
-    def _setup_secret_key(self, app):
-        err = ('use "secret_key" in the [flask] '
-               'section of your ini, not "secretkey"')
-        assert 'secretkey' not in self['flask'], err
-        try: secret_key = str(self['flask']['secret_key'])
-        except KeyError: raise SettingsError(error('secret_key'))
-        app.secret_key = secret_key
-
-    def _setup_sijax(self, app):
-        ssp = os.path.join(app.static_folder, 'js', 'sijax')
-        app.config['SIJAX_STATIC_PATH'] = ssp
-        assert os.path.exists(ssp),"SIJAX_STATIC_PATH@'{0}' does not exist".format(ssp)
-        app.config["SIJAX_JSON_URI"] = '/static/js/sijax/json2.js'
-        report("sijax settings: \n  {0}".format(
-            dict(SIJAX_STATIC_PATH=app.config['SIJAX_STATIC_PATH'],
-                 SIJAX_JSON_URI = app.config['SIJAX_JSON_URI'])))
-        flask_sijax.Sijax(app)
 
     def _get_app(self):
         if self._app_cache: return self._app_cache
@@ -268,19 +248,6 @@ class FlaskSettings(Dictionaryish):
         """ hook for subclassers.. """
         pass
 
-    def _setup_debug(self, app):
-        from flask_debugtoolbar import DebugToolbarExtension
-        debug = self['flask']['debug'].lower() in ['1','true']
-        app.debug = debug
-        if debug:
-            report((".ini lists debug as true: "
-                    "this setting will be migrated into flask"
-                    "app & debugtoolbar will be turned on."))
-
-            toolbar = DebugToolbarExtension(app)
-
-        return debug
-
     def run(self, *args, **kargs):
         """ this is a thing that probably does not belong in a
             settings abstraction, but it is very useful.. """
@@ -314,5 +281,48 @@ class FlaskSettings(Dictionaryish):
             runner(app=app, port=port, host=host, debug=debug)
             node = platform.node()
 
+    def _setup_debug(self, app):
+        from flask_debugtoolbar import DebugToolbarExtension
+        debug = self['flask']['debug'].lower() in ['1','true']
+        app.debug = debug
+        if debug:
+            report((".ini lists debug as true: "
+                    "this setting will be migrated into flask"
+                    "app & debugtoolbar will be turned on."))
+            toolbar = DebugToolbarExtension(app)
+        return debug
+
+    def _setup_mongo(self):
+        var = '_mongo_setup_call'
+        val = getattr(self, var, None)
+        if val is not None:
+            raise RuntimeError(
+                "Called _setup_mongo twice?")
+        port = int(self['mongo']['port'])
+        host = self['mongo']['host']
+        db = self['mongo']['db_name']
+        self.app.config["MONGODB_SETTINGS"] = dict(
+            DB=db, HOST=host, PORT=port)
+        from flask.ext.mongoengine import MongoEngine
+        db = MongoEngine(self.app)
+        setattr(self, var, dict(port=port,host=host,db=db))
+
+    def _setup_secret_key(self, app):
+        err = ('use "secret_key" in the [flask] '
+               'section of your ini, not "secretkey"')
+        assert 'secretkey' not in self['flask'], err
+        try: secret_key = str(self['flask']['secret_key'])
+        except KeyError: raise SettingsError(error('secret_key'))
+        app.secret_key = secret_key
+
+    def _setup_sijax(self, app):
+        ssp = os.path.join(app.static_folder, 'js', 'sijax')
+        app.config['SIJAX_STATIC_PATH'] = ssp
+        assert os.path.exists(ssp),"SIJAX_STATIC_PATH@'{0}' does not exist".format(ssp)
+        app.config["SIJAX_JSON_URI"] = '/static/js/sijax/json2.js'
+        report("sijax settings: \n  {0}".format(
+            dict(SIJAX_STATIC_PATH=app.config['SIJAX_STATIC_PATH'],
+                 SIJAX_JSON_URI = app.config['SIJAX_JSON_URI'])))
+        flask_sijax.Sijax(app)
 
 Settings = FlaskSettings
