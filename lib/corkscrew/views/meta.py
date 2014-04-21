@@ -1,4 +1,4 @@
-"""
+""" corkscrew.views.meta
 """
 from .base import View
 
