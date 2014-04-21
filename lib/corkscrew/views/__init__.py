@@ -2,7 +2,7 @@
 """
 from .lazy import LazyView
 from .base import FlaskView, View
-from .meta import ListViews
+from .meta import SettingsView
 
 from corkscrew.favicon import Favicon
 from corkscrew.comet import CometWorker

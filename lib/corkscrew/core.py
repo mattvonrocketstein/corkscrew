@@ -1,6 +1,6 @@
 """ corkscrew.core
 """
-
+from report import report
 from corkscrew.reflect import namedAny
 from corkscrew.exceptions import SettingsError
 

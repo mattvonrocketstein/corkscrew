@@ -1,28 +1,20 @@
 """ corkscrew.demo.views
 """
 
+from corkscrew.views import JSONEdit
+from corkscrew.views.nav import MakeMenu
+import demjson
+
 from collections import OrderedDict
 
 from corkscrew.views import View
 from corkscrew.comet import SijaxDemo
-from corkscrew.views.meta import ListViews, SettingsView
+from corkscrew.views.meta import SettingsView
 from corkscrew.views.nav import Nav, MakeMenu
+from corkscrew.proxy import ProxyFromSettings, RedirectsFromSettings
 
 class MyMenu(MakeMenu):
     pass
-def asdasdget_menu(self):
-        return [
-            ['simple-link', '#simple-link'],
-            ['drop1', [
-                ['test1', '#test1'],
-                ['test2', '#test2'],
-                ['test3', '#test3'],]],
-
-            ['drop2', [
-                ['test1', '#test1'],
-                ['test2', '#test2'],
-                ['test3', '#test3'],]],
-            ]
 
 class Home(View):
     url = '/'
@@ -48,6 +40,8 @@ class Home(View):
             demos=OrderedDict(
                 [ ['/comet?start=1','comet demo (via sijax)'],
                   ['/json_editor','a simple json editor'],
+                  ['/redirect', ('example redirect (define as '
+                                 'many as you want in the .ini)')],
                   ['/__views__' , 'shows views in this runtime'],
                   ["/_make_menu?menu=[['menu-header',[['menu-item','/']]]]" ,
                    'a parametric menu-maker, suitable for loading with ajax'],
@@ -59,10 +53,19 @@ class Home(View):
                 rootpath=self.app.root_path))
 
 
+class DemoPage(View):
+    url = '/demo_page'
+    @View.use_local_template
+    def main(self):
+        """
+        simple demo page.<br/><br/><hr/>
+        this template is embedded in the view code<br/>
+        for simplicity, but of course you can have
+        external templates as well.
+        """
+        return dict()
 
-from corkscrew.views import JSONEdit
-from corkscrew.views.nav import MakeMenu
-import demjson
+
 class DemoJSONEdit(JSONEdit):
     def get_json(self):
         return demjson.encode(
@@ -77,9 +80,10 @@ class DemoJSONEdit(JSONEdit):
 
 __views__ = [
     Home, Nav,
+    DemoPage,
     DemoJSONEdit,
     SijaxDemo,
+    RedirectsFromSettings,
     MakeMenu,
-    type('DemoListView', (ListViews,), dict(requires_auth=False)),
     type('DemoSettingsView', (SettingsView,), dict(requires_auth=False)),
     ]
