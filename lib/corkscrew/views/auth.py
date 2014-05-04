@@ -1,4 +1,4 @@
-""" corkscrew.auth
+""" corkscrew.views.auth
 """
 from werkzeug import check_password_hash
 import jinja2
@@ -6,7 +6,7 @@ import jinja2
 from flask import flash
 from flask import request, session, redirect
 
-from corkscrew import View
+from corkscrew.views.base import View
 from corkscrew.blueprint import BluePrint
 
 import report as reporting
@@ -38,10 +38,29 @@ class Login(AuthCommon):
     methods  = methods = ["GET", "POST"]
     template = 'login.html'
     blueprint = BluePrint('login', __name__)
-
-    def __invert__(self):
-        """ give the template literal if present. """
-        return self._template
+    _template = (
+        """
+        {% extends "layout.html" %}
+        {% block title %}Sign In{% endblock %}
+        {% block body %}
+        <h2>Sign In</h2>
+        {% if error %}
+        <div class=error><strong>Error:</strong> {{ error }}</div>
+        {% endif %}
+        <form action="" method=post>
+        <dl>
+        <dt>Username:
+        <dd>
+        <input type=text
+        name=username size=30 value="{{request.form.username}}">
+        <dt>Password:
+        <dd><input type=password name=password size=30>
+        <input type=hidden name=next value="{{request.values.next}}">
+        </dl>
+        <div class=actions><input type=submit value="Sign In"></div>
+        </form>
+        {% endblock %}
+        """)
 
     def render_template(self, *args, **kargs):
         """ variation of View.render_template that prefers
@@ -53,7 +72,10 @@ class Login(AuthCommon):
             return super(self.__class__,self).render_template(*args, **kargs)
         except jinja2.exceptions.TemplateNotFound:
             from flask.templating import render_template_string
-            report("template {T} not found, using literal",T=self.template)
+            err = "template@\"{T}\" not found, using literal"
+            err = err.format(T=self.template)
+            report(err)
+            assert self._template is not None, "No login template on filesystem or in class!"
             return render_template_string(self._template, **kargs)
 
     def main(self):

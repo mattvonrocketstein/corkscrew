@@ -10,9 +10,12 @@ from corkscrew.proxy import ProxyView
 from corkscrew.views.json_edit import JSONEdit
 from corkscrew.views.multi import MultiView
 from corkscrew.views._404 import FourOhFourView
+from corkscrew.views.auth import Login, Logout
 
 __all__ = [
     View,
+    Login,
+    Logout,
     Favicon,
     JSONEdit,
     LazyView,
