@@ -1,6 +1,5 @@
 """ corkscrew.views.json_edit
 """
-from jinja2 import Template
 from corkscrew.views import View
 
 

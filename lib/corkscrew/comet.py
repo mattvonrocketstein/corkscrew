@@ -9,7 +9,6 @@ from goulash.stdout import ThreadedStdout
 from goulash.ansi import Ansi2HTMLConverter
 
 from corkscrew.views import View
-from corkscrew.util import use_local_template
 
 class SijaxView(View):
     """ Very basic corkscrew integration with sijax.
@@ -55,7 +54,7 @@ class CometWorker(SijaxView):
         unansi = conv.convert
         obj_response.html_append('#comet_data', conv.get_style())
         thr = threading.Thread(target=lambda: self.worker(**bonk), name='testing')
-        q = self.stdout.register(thr)
+        self.stdout.register(thr)
         thr.start()
 
         hidebusy = lambda:obj_response.css('#loading_icon', 'display', 'none')

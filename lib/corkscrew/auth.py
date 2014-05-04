@@ -1,9 +1,9 @@
 """ corkscrew.auth
 """
-from werkzeug import check_password_hash, generate_password_hash
+from werkzeug import check_password_hash
 import jinja2
 
-from flask import render_template, g, flash
+from flask import flash
 from flask import request, session, redirect
 
 from corkscrew import View
@@ -51,7 +51,7 @@ class Login(AuthCommon):
         """
         try:
             return super(self.__class__,self).render_template(*args, **kargs)
-        except jinja2.exceptions.TemplateNotFound, e:
+        except jinja2.exceptions.TemplateNotFound:
             from flask.templating import render_template_string
             report("template {T} not found, using literal",T=self.template)
             return render_template_string(self._template, **kargs)
@@ -65,7 +65,6 @@ class Login(AuthCommon):
         if request.method == 'POST':
             users = self.settings['users']
             user = self['username']
-            next = self['next']
             if user not in users:
                 #print __file__,':valid users:', users
                 return self.render_template(error='Invalid username')

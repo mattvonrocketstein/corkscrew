@@ -3,16 +3,13 @@
 
 import os
 import base64
-import demjson
 import warnings
-import platform
 import importlib
 import configparser
 
 import flask_sijax
-from flask import Flask, url_for
-from jinja2 import FileSystemLoader
-from werkzeug import check_password_hash, generate_password_hash
+from flask import Flask
+from werkzeug import generate_password_hash
 
 import report as reporting
 from corkscrew.exceptions import SettingsError
@@ -225,7 +222,7 @@ class FlaskSettings(Dictionaryish):
             runner_dotpath = self['user.runner']
         else:
             try:
-                runner_dotpath = self['corkscrew']['runner']
+                runner_dotpath = corkscrew_section['runner']
             except KeyError:
                 warning = 'item "runner" not found in [flask] section, using naive runner'
                 warnings.warn(warning)
@@ -280,7 +277,6 @@ class FlaskSettings(Dictionaryish):
             debug = self._setup_debug(app)
             runner = self.runner
             runner(app=app, port=port, host=host, debug=debug)
-            node = platform.node()
 
     def _setup_debug(self, app):
         from flask_debugtoolbar import DebugToolbarExtension
@@ -290,7 +286,7 @@ class FlaskSettings(Dictionaryish):
             report((".ini lists debug as true: "
                     "this setting will be migrated into flask"
                     "app & debugtoolbar will be turned on."))
-            toolbar = DebugToolbarExtension(app)
+            DebugToolbarExtension(app)
         return debug
 
     def _setup_mongo(self):
@@ -325,7 +321,7 @@ class FlaskSettings(Dictionaryish):
                'section of your ini, not "secretkey"')
         assert 'secretkey' not in self['flask'], err
         try: secret_key = str(self['flask']['secret_key'])
-        except KeyError: raise SettingsError(error('secret_key'))
+        except KeyError: raise SettingsError(err)
         app.secret_key = secret_key
 
     def _setup_sijax(self, app):

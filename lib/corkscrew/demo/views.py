@@ -2,7 +2,6 @@
 """
 
 from corkscrew.views import JSONEdit
-from corkscrew.views.nav import MakeMenu
 import demjson
 
 from collections import OrderedDict
@@ -11,7 +10,7 @@ from corkscrew.views import View
 from corkscrew.comet import SijaxDemo
 from corkscrew.views.meta import SettingsView
 from corkscrew.views.nav import Nav, MakeMenu
-from corkscrew.proxy import ProxyFromSettings, RedirectsFromSettings
+from corkscrew.proxy import RedirectsFromSettings#, ProxyFromSettings
 
 class MyMenu(MakeMenu):
     pass

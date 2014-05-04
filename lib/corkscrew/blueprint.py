@@ -1,7 +1,7 @@
 """ corkscrew.blueprint
 """
 
-import os, uuid
+import uuid
 
 from flask import Blueprint as _Blueprint
 from report import report

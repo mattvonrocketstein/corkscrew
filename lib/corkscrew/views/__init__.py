@@ -12,9 +12,13 @@ from corkscrew.views.multi import MultiView
 from corkscrew.views._404 import FourOhFourView
 
 __all__ = [
+    View,
     Favicon,
     JSONEdit,
-    CometWorker,
+    LazyView,
     ProxyView,
-    FlaskView
-    ]
+    FlaskView,
+    MultiView,
+    CometWorker,
+    SettingsView,
+    FourOhFourView, ]

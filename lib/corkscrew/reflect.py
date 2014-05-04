@@ -15,21 +15,10 @@ import weakref
 import re
 import warnings
 import new
-try:
-    from collections import deque
-except ImportError:
-    deque = list
+from collections import deque
+from cStringIO import StringIO
 
 RegexType = type(re.compile(""))
-
-
-try:
-    from cStringIO import StringIO
-except ImportError:
-    from StringIO import StringIO
-
-
-
 
 
 class Settable:

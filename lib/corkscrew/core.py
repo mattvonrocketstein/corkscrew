@@ -28,7 +28,7 @@ def _setup_views(settings, app):
         for v in view_list:
             try:
                 view_instances.append(v(app=app, settings=settings))
-            except Exception, e:
+            except Exception:
                 report('error working with view: '+str(v))
                 raise
         for v in view_instances:
