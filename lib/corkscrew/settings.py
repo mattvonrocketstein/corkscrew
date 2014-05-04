@@ -298,7 +298,7 @@ class FlaskSettings(Dictionaryish):
         port = ( self['mongo'].get('port') and \
                  int(self['mongo']['port'])) or \
                  None
-        host = self['mongo']['host']
+        host = self['mongo'].get('host', 'localhost')
         db = self['mongo']['db_name']
         user = self['mongo'].get('username', None) or \
                self['mongo'].get('user', None) or \
