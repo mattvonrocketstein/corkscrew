@@ -50,7 +50,7 @@ class FlaskView(LazyView):
         try:
             app.add_url_rule(v.url, v.__name__, v)
         except AssertionError:
-            report("ERROR! adding view: {0}@{1}. url would have been {3}".format(
+            report("ERROR! adding view: {0}@{1}. url would have been {2}".format(
                 v.__name__, v, v.url))
             raise
         app.register_blueprint(v.blueprint)

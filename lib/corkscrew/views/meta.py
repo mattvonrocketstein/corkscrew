@@ -1,6 +1,6 @@
 """ corkscrew.views.meta
 """
-from .base import View
+from corkscrew.views.base import View
 
 class SettingsView(View):
     url = '/__settings__'

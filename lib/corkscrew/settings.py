@@ -2,6 +2,7 @@
 """
 
 import os
+import base64
 import demjson
 import warnings
 import platform
@@ -298,14 +299,26 @@ class FlaskSettings(Dictionaryish):
         if val is not None:
             raise RuntimeError(
                 "Called _setup_mongo twice?")
-        port = int(self['mongo']['port'])
+        port = ( self['mongo'].get('port') and \
+                 int(self['mongo']['port'])) or \
+                 None
         host = self['mongo']['host']
         db = self['mongo']['db_name']
+        user = self['mongo'].get('username', None) or \
+               self['mongo'].get('user', None) or \
+               None
+        pwd = self['mongo'].get('password', None) or \
+              self['mongo'].get('pass', None) or \
+              None
+        if pwd:
+            pwd = base64.decodestring(pwd)
         self.app.config["MONGODB_SETTINGS"] = dict(
-            DB=db, HOST=host, PORT=port)
+            db=db, host=host, port=port,
+            username=user, password=pwd)
+
         from flask.ext.mongoengine import MongoEngine
         db = MongoEngine(self.app)
-        setattr(self, var, dict(port=port,host=host,db=db))
+        setattr(self, var, dict(port=port, host=host, db=db))
 
     def _setup_secret_key(self, app):
         err = ('use "secret_key" in the [flask] '

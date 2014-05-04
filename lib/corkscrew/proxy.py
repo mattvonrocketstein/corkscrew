@@ -35,7 +35,6 @@ class ViewsFromSettings(FlaskView):
         for local_url in subsection:
             proxy_url = subsection[local_url]
             name = 'Dynamic{0}:{1}'.format(self.settings_subsection, local_url)
-            self.report("Built this one:",name)
             View = type(name,
                         (self.concrete_view_class,), dict(proxy_url=proxy_url, url=local_url))
             view = View(app=app, settings=self.settings)
