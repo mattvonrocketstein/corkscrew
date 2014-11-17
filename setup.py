@@ -1,48 +1,36 @@
-from setuptools import setup, find_packages
+#!/usr/bin/env python
+""" setup.py for corkscrew
+"""
+import os, sys
+from setuptools import setup
 
-try:
-    from setuptools import setup, find_packages
-    have_setuptools = True
-except ImportError:
-    from distutils.core import setup
-    def find_packages():
-        return ['corkscrew',]
-    have_setuptools = False
+# make sure that finding packages works, even
+# when setup.py is invoked from outside this dir
+this_dir = os.path.dirname(os.path.abspath(__file__))
+if not os.getcwd()==this_dir:
+    os.chdir(this_dir)
 
-try:
-    from distutils.command.build_py import build_py_2to3 as build_py
-except ImportError:
-    from distutils.command.build_py import build_py
+# make sure we can import the version number so that it doesn't have
+# to be changed in two places. corkscrew/__init__.py is also free
+# to import various requirements that haven't been installed yet
+sys.path.append(os.path.join(this_dir, 'corkscrew'))
+from version import __version__
+sys.path.pop()
 
-if have_setuptools:
-    add_keywords = dict( entry_points = \
-                         { 'console_scripts': \
-                           ['corkscrew = corkscrew.bin._corkscrew:entry', ]
-                         }, )
-else:
-    add_keywords = dict( scripts = ['corkscrew'], )
 
 setup(
-    name         ='corkscrew',
-    version      = '.1',
+    name         = 'corkscrew',
     description  = 'ooviews, settings, and basic authentication for flask',
-    author       = 'mattvonrocketstein, in the gmails',
-    url          = 'one of these days',
-    license      = 'BSD License',
-    package_dir  = {'': 'lib'},
-    packages     = find_packages('lib'),
-    long_description = __doc__,
-    keywords = 'flask',
-    platforms = 'any',
-    zip_safe = False,
+    version      = __version__,
+    author       = 'mattvonrocketstein',
+    author_email = '$author@gmail',
+    url          = 'https://github.com/mattvonrocketstein/corkscrew/',
+    download_url = 'https://github.com/mattvonrocketstein/corkscrew/tarball/0.1',
     include_package_data = True,
-    classifiers = [
-        'License :: OSI Approved :: BSD License',
-        'Intended Audience :: Developers',
-        'Development Status :: 000 - Experimental',
-        'Programming Language :: Python',
-        'Programming Language :: Python :: 2',
-        'Operating System :: OS Independent', ],
-    cmdclass = {'build_py': build_py},
-    **add_keywords
+    packages     = ['corkscrew'],
+    keywords     = ['flask'],
+    entry_points = \
+    { 'console_scripts': \
+      ['corkscrew = corkscrew.bin._corkscrew:entry', ]
+      },
 )
