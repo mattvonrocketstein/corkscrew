@@ -261,13 +261,12 @@ class FlaskSettings(Dictionaryish):
 
         if self._settings['user']['shell']:
             try:
-                from IPython import Shell;
+                from smashlib import embed;
             except ImportError:
-                raise SettingsError("You need IPython installed "
+                raise SettingsError("You need smashlib installed "
                                     "if you want to use the shell.")
             else:
-                Shell.IPShellEmbed(argv=['-noconfirm_exit'],
-                                   user_ns=self.shell_namespace())()
+                embed(user_ns=self.shell_namespace())
 
         else:
             app  = self.app
