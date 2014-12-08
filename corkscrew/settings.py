@@ -60,9 +60,6 @@ class FlaskSettings(Dictionaryish):
                           help="encode password hash using werkzeug")
         return parser
 
-    def __mod__(self, other):
-        raise Exception, 'deprecated'
-
     @property
     def settings_file(self):
         if self.options.config:
@@ -195,7 +192,14 @@ class FlaskSettings(Dictionaryish):
         self._installed_views = core._setup_views(self, app)
         #report('built urls: {u}',u=[v.url for v in views])
         reporting.console.draw_line()
+        import humanize
+        app.template_filter()(humanize.naturaltime)
+        app.template_filter()(humanize.naturaldate)
+        #app.template_filter()(urlify_markdown)
+        #app.template_filter()(markdown.markdown)
+
         self._app_cache = app
+
         return app
 
     def load(self, file, config={}):

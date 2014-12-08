@@ -17,6 +17,7 @@ sys.path.append(os.path.join(this_dir, 'corkscrew'))
 from version import __version__
 sys.path.pop()
 
+base_url = 'https://github.com/mattvonrocketstein/corkscrew/'
 
 setup(
     name         = 'corkscrew',
@@ -24,8 +25,8 @@ setup(
     version      = __version__,
     author       = 'mattvonrocketstein',
     author_email = '$author@gmail',
-    url          = 'https://github.com/mattvonrocketstein/corkscrew/',
-    download_url = 'https://github.com/mattvonrocketstein/corkscrew/tarball/0.1',
+    url          = base_url,
+    download_url = base_url+'/tarball/0.1',
     include_package_data = True,
     packages     = ['corkscrew'],
     keywords     = ['flask'],
