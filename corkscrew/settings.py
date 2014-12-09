@@ -60,6 +60,9 @@ class FlaskSettings(Dictionaryish):
                           help="encode password hash using werkzeug")
         return parser
 
+    def keys(self):
+        return self._settings.keys()
+
     @property
     def settings_file(self):
         if self.options.config:
