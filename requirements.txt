@@ -1,12 +1,4 @@
-flask
-demjson==1.6
-pygments # required by reporting
-configparser
-Flask-AutoIndex
-flask-debugtoolbar
-git+git://github.com/mattvonrocketstein/reporting.git#egg=reporting
-git+git://github.com/mattvonrocketstein/goulash.git#egg=goulash
-flask_sijax
-couchdb==0.8
-Importing==1.10
-tornado
+#
+# corkscrew/requirements.txt
+#
+# all requirements should be in setup.py

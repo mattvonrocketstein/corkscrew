@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-""" setup.py for corkscrew
+""" corkscrew/setup.py
 """
 import os, sys
 from setuptools import setup
@@ -16,22 +16,36 @@ if not os.getcwd()==this_dir:
 sys.path.append(os.path.join(this_dir, 'corkscrew'))
 from version import __version__
 sys.path.pop()
+install_requires = [
+    'flask',
+    'flask_sijax',
+    'flask-cache',
+    'humanize',
+    'tornado',
+    'demjson',
+    'configparser',
+    'Flask-AutoIndex',
+    'flask-debugtoolbar',
+    'reporting',
+    'goulash',
+    'Importing',
+    'mongoengine',
+    'pymongo',
+    'flask-mongoengine',
+]
 
 base_url = 'https://github.com/mattvonrocketstein/corkscrew/'
-
 setup(
-    name         = 'corkscrew',
-    description  = 'ooviews, settings, and basic authentication for flask',
-    version      = __version__,
     author       = 'mattvonrocketstein',
     author_email = '$author@gmail',
+    name         = 'corkscrew',
+    description  = 'ooviews, settings, and basic authentication for flask',
+    install_requires=install_requires,
+    version      = __version__,
     url          = base_url,
-    download_url = base_url+'/tarball/0.1',
     include_package_data = True,
     packages     = ['corkscrew'],
     keywords     = ['flask'],
-    entry_points = \
-    { 'console_scripts': \
-      ['corkscrew = corkscrew.bin._corkscrew:entry', ]
-      },
-)
+    entry_points = dict(
+        console_scripts=['corkscrew = corkscrew.bin._corkscrew:entry',])
+    )
