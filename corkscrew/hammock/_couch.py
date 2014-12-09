@@ -11,7 +11,7 @@ import demjson
 import couchdb
 from peak.util.imports import lazyModule
 
-from hammock.utils import AllStaticMethods
+from corkscrew.hammock.utils import AllStaticMethods
 from report import report as report
 from mongoengine import Document as mDocument
 from mongoengine import ListField, StringField

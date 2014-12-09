@@ -3,7 +3,7 @@
 
 from flask import jsonify
 
-from hammock.utils import authorization_required
+from corkscrew.hammock.utils import authorization_required
 
 from report import report
 

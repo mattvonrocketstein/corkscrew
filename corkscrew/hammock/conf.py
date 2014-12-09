@@ -18,7 +18,7 @@ class Settings(_Settings):
             ugh hack
         """
         super(Settings,self).__init__(*args, **kargs)
-        from hammock import conf
+        from corkscrew.hammock import conf
         conf.settings = self
 
     def shell_namespace(self):

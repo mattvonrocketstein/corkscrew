@@ -15,7 +15,7 @@ from flask import render_template
 
 from report import report
 
-from hammock.utils import authorization_required
+from corkscrew.hammock.utils import authorization_required
 
 def nonprivate_editable(key, db_schema):
     """ """

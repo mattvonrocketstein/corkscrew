@@ -7,7 +7,7 @@ from corkscrew import View
 from corkscrew.blueprint import BluePrint
 from report import report as report
 
-from hammock.utils import memoized_property
+from corkscrew.hammock.utils import memoized_property
 from .tags import TagMixin
 
 class DBView(View):
