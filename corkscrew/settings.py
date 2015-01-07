@@ -191,7 +191,7 @@ class FlaskSettings(Dictionaryish):
         self._parse_autoindex(app)
 
         if 'template_path' in flask_section:
-            raise Exception,'deprecated'
+            raise Exception('deprecated')
 
         core._setup_pre_request(self, app)
         core._setup_post_request(self, app)

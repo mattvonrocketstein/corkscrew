@@ -76,7 +76,7 @@ class DemoJSONEdit(JSONEdit):
                      subobj = dict(
                          arr=["foo", "ha"],
                          numero= 1))))
-
+from corkscrew.admin import AdminView
 __views__ = [
     Home, Nav,
     DemoPage,
@@ -84,5 +84,6 @@ __views__ = [
     SijaxDemo,
     RedirectsFromSettings,
     MakeMenu,
+    type('DemoAdminView', (AdminView,), dict(requires_auth=False)),
     type('DemoSettingsView', (SettingsView,), dict(requires_auth=False)),
     ]

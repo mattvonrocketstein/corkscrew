@@ -6,8 +6,9 @@ from corkscrew.views import View
 class JSONEdit(View):
     url = '/json_editor'
     template = 'json_editor.html'
+
     def get_json(self):
-        raise Exception,'subclassers should override this method'
+        raise Exception('subclassers should override this method')
 
     def get_ctx(self):
         extra_scripts = [
@@ -15,7 +16,7 @@ class JSONEdit(View):
             '/static/js/json2.js',
             '/static/js/jquery.jsoneditor.js',
             '/static/js/jsoneditor.js',]
-        extra_css = ["/static/css/jsoneditor.css" ]
+        extra_css = [ "/static/css/jsoneditor.css" ]
         return dict(
             json = self.get_json(),
             extra_css = extra_css,

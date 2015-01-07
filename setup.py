@@ -26,6 +26,7 @@ install_requires = [
     'configparser',
     'Flask-AutoIndex',
     'flask-debugtoolbar',
+    'pygments',
     'reporting',
     'goulash',
     'Importing',

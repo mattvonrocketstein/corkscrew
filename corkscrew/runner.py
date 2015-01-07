@@ -57,7 +57,7 @@ class if_importable:
         msg = msg or self.base_error.format(module=self.module_name)
         msg = base_error + msg
         def new_func(*args, **kargs):
-            raise RuntimeError, msg
+            raise RuntimeError(msg)
         return new_func
 
 @if_importable('tornado')

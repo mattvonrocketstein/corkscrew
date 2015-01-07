@@ -1,8 +1,5 @@
 """ corkscrew.admin
 """
-import platform
-import subprocess
-
 from corkscrew import View
 from corkscrew.blueprint import BluePrint
 

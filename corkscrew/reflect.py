@@ -477,7 +477,7 @@ def macro(name, filename, source, **identifiers):
     # shield your eyes!
     sm = sys.modules
     tprm = "twisted.python.reflect.macros"
-    if not sm.has_key(tprm):
+    if not tprm not in sm:
         macros = new.module(tprm)
         sm[tprm] = macros
         macros.count = 0
