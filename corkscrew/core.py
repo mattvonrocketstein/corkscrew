@@ -2,7 +2,6 @@
 """
 from report import report
 from corkscrew.reflect import namedAny
-from corkscrew.exceptions import SettingsError
 
 def _setup_pre_request(settings, app):
     flask_section = settings['flask']

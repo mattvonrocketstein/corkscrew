@@ -6,12 +6,13 @@ import signal
 from importlib import import_module
 
 from report import report
-from corkscrew.settings import settings
-expanduser = os.path.expanduser
+from goulash.python import expanduser
+
+import corkscrew
 
 def write_pid_file():
     """ write the pidfile """
-    pid_file = expanduser(settings['corkscrew']['pid_file'])
+    pid_file = expanduser(corkscrew.SETTINGS['corkscrew']['pid_file'])
     if os.path.abspath(pid_file) != pid_file:
         err = 'Please use absolute path for "pid_file" entry in [corkscrew] section'
         raise RuntimeError(err)
