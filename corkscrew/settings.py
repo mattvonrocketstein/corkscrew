@@ -55,6 +55,10 @@ class FlaskSettings(Dictionaryish):
             "-c", default='',dest='cmd',
             help=("like python -c: \"a program passed in"
                   " as string (terminates option list)\""))
+        parser.add_option(
+            "-v", '--version', default=False,dest='version',
+            action='store_true',
+            help=("show version information"))
         parser.add_option("--port",  dest="port",
                           default='', help="server listen port")
         parser.add_option("--runner",  dest="runner",
@@ -282,6 +286,10 @@ class FlaskSettings(Dictionaryish):
         """ hook for subclassers.. """
         pass
 
+    def show_version(self):
+        from corkscrew import __version__
+        print 'corkscrew=={0}'.format(__version__)
+
     def run(self, *args, **kargs):
         """ this is a thing that probably does not belong in a
             settings abstraction, but it is very useful.. """
@@ -292,7 +300,8 @@ class FlaskSettings(Dictionaryish):
             ns.update(settings=self)
             exec self.options.cmd in self.shell_namespace()
             self.done = True
-
+        if self.options.version:
+            return self.show_version()
         if self.done: return
 
         if self._settings['user']['shell']:
