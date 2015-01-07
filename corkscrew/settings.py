@@ -7,15 +7,15 @@ import warnings
 import importlib
 import configparser
 
+import humanize
 import flask_sijax
 from flask import Flask
 from werkzeug import generate_password_hash
+from corkscrew.reflect import namedAny
 
-import report as reporting
+from report import report, console
 from corkscrew.exceptions import SettingsError
 from corkscrew import core
-
-report = reporting.getReporter(label=False)
 
 class Dictionaryish(object):
     def __contains__(self, other):
@@ -34,6 +34,16 @@ class FlaskSettings(Dictionaryish):
     default_file = 'corkscrew.ini'
     jinja_globals = {}
     jinja_filters = {}
+
+    def get_proxies(self):
+        if 'proxy' in self:
+            return dict(self['proxy'].items())
+        return {}
+
+    def get_redirects(self):
+        if 'redirects' in self:
+            return dict(self['redirects'].items())
+        return {}
 
     @classmethod
     def get_parser(kls):
@@ -125,9 +135,18 @@ class FlaskSettings(Dictionaryish):
         self.doit()
 
     def doit(self):
-        """ hack """
+        """ total hack """
         global settings
         settings = self
+
+    def get_schemas(self):
+        """ """
+        dotpath = self['corkscrew'].get('base_schema', None)
+        if dotpath:
+            BaseSchema = namedAny(dotpath)
+            schemas = dict([[x.__name__, x] for x in BaseSchema.__subclasses__() ])
+            return schemas
+        return {}
 
     @property
     def app(self):
@@ -194,8 +213,7 @@ class FlaskSettings(Dictionaryish):
         ## setup views
         self._installed_views = core._setup_views(self, app)
         #report('built urls: {u}',u=[v.url for v in views])
-        reporting.console.draw_line()
-        import humanize
+        console.draw_line()
         app.template_filter()(humanize.naturaltime)
         app.template_filter()(humanize.naturaldate)
         #app.template_filter()(urlify_markdown)
@@ -238,16 +256,27 @@ class FlaskSettings(Dictionaryish):
             runner = core.namedAny(runner_dotpath)
         except AttributeError:
             err="Could not find runner specified by dotpath: "+runner_dotpath
-            raise AttributeError,err
+            raise AttributeError(err)
         else:
             report("Using runner: {r}",r=runner_dotpath)
             return runner
+
+    def get_views(self):
+        dotpath = self['corkscrew']['views']
+        views = namedAny(dotpath)
+        views =  dict([[v.__name__, v] for v in views])
+        return views
 
     def shell_namespace(self):
         """ publish the namespace that's available to shell.
             subclasses should not forget to call super()!
         """
-        return dict(app=self.app, settings=self)
+        return dict(
+            app=self.app, settings=self,
+            schemas = self.get_schemas(),
+            proxies = self.get_proxies(),
+            redirects = self.get_redirects(),
+            views = self.get_views())
 
     def pre_run(self):
         """ hook for subclassers.. """

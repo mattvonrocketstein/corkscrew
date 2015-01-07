@@ -468,7 +468,7 @@ def macro(name, filename, source, **identifiers):
 
     This allows you to create macro-like behaviors in python.
     """
-    if not identifiers.has_key('name'):
+    if name not in identifiers:
         identifiers['name'] = name
     source = source % identifiers
     codeplace = "<%s (macro)>" % filename

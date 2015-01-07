@@ -1,7 +1,5 @@
-""" hammock.views.db
+""" corkscrew.hammock.views.db
 """
-
-from flask import render_template
 
 from corkscrew import View
 from corkscrew.blueprint import BluePrint
@@ -26,7 +24,7 @@ class DBView(View):
 
     def _setup_tags(self, *args, **kargs):
         if isinstance(self.Tags, TagMixin):
-            raise Exception, 'already initialized'
+            raise Exception('already initialized')
         report('installing tagging')
         clsname = 'DynTags{0}'.format(self.__class__.__name__)
         self.Tags = type(clsname,
@@ -74,17 +72,16 @@ class DBView(View):
             queryset = (self._db[x] for x in keys)
             for row in queryset:
                 yield row.id, dict(row)
-
         else:
             queryset = self._db.all()
             for row in queryset:
                 yield row.id, row.value
 
-    def rows_at(self, attr_name):
-        """ DEPRECATE """
-        q = '''function(doc){emit(null, doc.%s);}''' % attr_name
-        out = [ x.value for x in self._db.query(q) ]
-        return out
+    #def rows_at(self, attr_name):
+    #    """ DEPRECATE """
+    #    q = '''function(doc){emit(null, doc.%s);}''' % attr_name
+    #    out = [ x.value for x in self._db.query(q) ]
+    #    return out
 
     def _all_unique_tags(self):
         return self.db_schema.objects.distinct('tags')
@@ -95,11 +92,11 @@ class DBView(View):
     #@memoized_property
     #def server(self): return Server()
 
-    def _tag_filter_function(self, tag):
-        """ TODO: dryer"""
-        out = render_template('js/tag_query.js', tag=tag)
-        print '-'*70, out, '-'*70
-        return out
+    #def _tag_filter_function(self, tag):
+    #    """ TODO: dryer"""
+    #    out = render_template('js/tag_query.js', tag=tag)
+    #    print '-'*70, out, '-'*70
+    #    return out
 
     def filter_where_tag_is(self, tag):
         """ NOTE: returns keys only! """

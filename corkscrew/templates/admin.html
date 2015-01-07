@@ -1,0 +1,128 @@
+{%extends "abstract.html"%}
+
+{%block body%}
+<hr/>
+<a class=special_elite href=#>{{env}}</a> |
+<a class=special_elite href=#config>config</a> |
+<a class=special_elite href=#proxies>proxies</a> |
+<a class=special_elite href=#redirects>redirects</a> |
+<a class=special_elite href=#schemas>db & schemas</a> |
+<a class=special_elite href=/logout>logout</a> |<br/>
+
+<br/>
+{%if items%}
+<b>{{items[0].__class__.__name__}}: {{items|length}}</b>
+<small>
+  {%for item in items%}
+  {{item.id}}, {{item}},
+  <br/>
+  {%endfor%}
+</small>
+{%else%}
+<a id=Config><strong>Config</strong></a>
+<style>
+  {%include "highlight.css"%}
+</style>
+<div style="margin-left:25px;align:left">
+  <small>
+    {%autoescape off%}
+    {{config}}
+    {%endautoescape%}
+  </small>
+</div>
+<hr/>
+
+<br/><a id=Proxies><strong>Proxies</strong></a>
+<div style="margin-left:25px;align:left">
+  <table>
+    {%for url1, url2 in proxies.items() %}
+    <tr>
+      <td>
+        <a href="{{url1}}">{{url1}}</a>
+        <strong>→</strong>
+        <a href="{{url2}}">{{url2}}</a>
+      </td>
+    </tr>
+    {%endfor%}
+  </table>
+</div>
+<hr/>
+
+<br/><a id=redirects><strong>Redirects</strong></a>
+<div class=left25 style="align:left">
+  <table>
+    {%for url1, url2 in redirects.items() %}
+    <tr>
+      <td>
+        <a href="{{url1}}">{{url1}}</a>
+        <strong>→</strong>
+        <small><small><a href="{{url2}}">{{url2}}</a></small></small>
+      </td>
+    </tr>
+    {%endfor%}
+  </table>
+</div>
+<hr/>
+
+<br/><a id=schemas><strong>DB & Schemas</strong></a>
+<div style="margin-left:25px;align:left">
+  <table>
+    {%for name,s in schemas.items() %}
+    <tr>
+      <td>
+        <strong>
+          <a href=#><small>{{s.__module__}}</small>.{{name}}</a>
+        </strong>
+        with {{s.objects.count()}} items
+        <small><small>
+            <a href="{{this_url}}?schema={{name}}">view all</a>
+        </small></small>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <div style="margin-left:10px">
+        {%if s.__doc__%}
+        <pre>{{s.__doc__}}</pre>
+        {%else%} No docstring
+        {%endif%}
+        </div>
+      </td>
+    </tr>
+    {%endfor%}
+  </table>
+</div>
+<hr/>
+
+<br/><a id=views><strong>Views</strong></a>
+<div style="margin-left:25px;align:left">
+  <table>
+    {%for name,s in views.items() %}
+    <tr>
+      <td>
+        <strong>
+          <a href="{{s.url or '#'}}">
+            <small>{{s.__module__}}</small>.{{name}}
+          </a>
+        </strong>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <div style="margin-left:10px">
+        {%if s.__doc__%}
+        <pre>{{s.__doc__}}</pre>
+        {%else%} No docstring
+        {%endif%}
+        </div>
+      </td>
+    </tr>
+    {%endfor%}
+  </table>
+</div>
+<hr/>
+
+<strong>Database</strong>
+<hr>
+{%endif%}
+{%endblock%}
