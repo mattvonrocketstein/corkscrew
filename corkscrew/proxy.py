@@ -26,12 +26,11 @@ class RedirectView(FlaskView):
         return self.redirect(self.proxy_url)
 
 class ViewsFromSettings(FlaskView):
+
     def install_into_app(self, app):
         out = []
-        subsection = self.settings[self.settings_subsection]
-        if not subsection:
-            self.report("WARNING: No subsection for {0}".format(self.settings_subsection))
-            from IPython import Shell; Shell.IPShellEmbed(argv=['-noconfirm_exit'])()
+        subsection = self.settings.get_section(
+            self.settings_subsection, insist=True)
         for local_url in subsection:
             proxy_url = subsection[local_url]
             name = 'Dynamic{0}:{1}'.format(self.settings_subsection, local_url)

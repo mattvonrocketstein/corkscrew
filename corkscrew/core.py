@@ -2,11 +2,12 @@
 """
 from report import report
 from corkscrew.reflect import namedAny
+from goulash.settings import SettingsError
 
 def _setup_pre_request(settings, app):
-    flask_section = settings['flask']
-    if 'before_request' in flask_section:
-        before_request = settings['flask']['before_request']
+    flask_section = settings.get_section('flask', insist=True)
+    before_request = settings.get_setting('flask.before_request')
+    if before_request is not None:
         before_request = namedAny(before_request)
         app.before_request(before_request)
 
@@ -14,26 +15,21 @@ def _setup_views(settings, app):
     """ NOTE: at this point app is only partially setup.
         (do not attempt to use the app @property here)
     """
-    corkscrew_section = settings['corkscrew']
-    try:
-        view_holder = corkscrew_section['views']
-    except KeyError:
-        error = ('Fatal: could not find "views=<dotpath>" entry in the'
-                 '[corkscrew] section of your .ini file')
-        raise SettingsError(error)
-    else:
-        view_list = namedAny(view_holder)
-        view_instances = []
-        for v in view_list:
-            try:
-                view_instances.append(v(app=app, settings=settings))
-            except Exception:
-                report('error working with view: '+str(v))
-                raise
-        for v in view_instances:
-            sub_views = v.install_into_app(app)
-            view_instances += sub_views
-        return view_instances
+    corkscrew_section = settings.get_section('corkscrew', insist=True)
+    view_holder = settings.get_setting('corkscrew.views',insist=True)
+
+    view_list = namedAny(view_holder)
+    view_instances = []
+    for v in view_list:
+        try:
+            view_instances.append(v(app=app, settings=settings))
+        except Exception:
+            report('error working with view: '+str(v))
+            raise
+    for v in view_instances:
+        sub_views = v.install_into_app(app)
+        view_instances += sub_views
+    return view_instances
 
 def _setup_post_request(settings, app):
     flask_section = settings['flask']

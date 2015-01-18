@@ -9,8 +9,8 @@ import configparser
 
 import humanize
 import flask_sijax
-from flask.ext.mongoengine import MongoEngine
 from flask import Flask
+from flask.ext.mongoengine import MongoEngine
 from werkzeug import generate_password_hash
 
 from report import report, console
@@ -69,7 +69,7 @@ class Overrides(BaseSettings):
                 print generate_password_hash(self.options.encode)
                 return
             app  = self.app
-            port = int(self['flask']['port'])
+            port = int(self.get_setting('flask.port', insist=True))
             report('running on port: {0}'.format(port))
             host = self['flask']['host']
             debug = self._setup_debug(app)
@@ -147,8 +147,9 @@ class FlaskSettings(Overrides):
         ## set flask specific things that are non-optional
         error = lambda k: 'Fatal: You need to specify a "flask" section ' + \
                 'with an entry like  "'+k+'=..." in your .ini file'
-        try: app_name = self['flask']['app']
-        except KeyError: raise SettingsError(error('app'))
+        app_name = self.get_setting('flask.app', insist=True)
+        if app_name is None:
+            raise SettingsError(error('app'))
 
         try: static_folder = os.path.expanduser(self['flask']['static_folder'])
         except KeyError: static_folder = 'static'
@@ -158,7 +159,7 @@ class FlaskSettings(Overrides):
 
         ## set flask specific things that are optional
         flask_section = self['flask']
-        corkscrew_section = self['corkscrew']
+        corkscrew_section = self.get_section('corkscrew', insist=True)
 
         self._parse_autoindex(app)
 
@@ -229,7 +230,7 @@ class FlaskSettings(Overrides):
 
     def _setup_debug(self, app):
         from flask_debugtoolbar import DebugToolbarExtension
-        debug = self['flask']['debug'].lower() in ['1','true']
+        debug = self.get_setting('flask.debug', default='false')
         app.debug = debug
         if debug:
             report((".ini lists debug as true: "
@@ -268,8 +269,7 @@ class FlaskSettings(Overrides):
             err = ('use "secret_key" in the [flask] '
                    'section of your ini, not "secretkey"')
             raise SettingsError(err)
-        try: secret_key = str(self['flask']['secret_key'])
-        except KeyError: raise SettingsError(err)
+        secret_key = self.get_setting('flask.secret_key', insist=True)
         app.secret_key = secret_key
 
     def _setup_sijax(self, app):

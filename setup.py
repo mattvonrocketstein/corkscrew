@@ -17,36 +17,37 @@ sys.path.append(os.path.join(this_dir, 'corkscrew'))
 from version import __version__
 sys.path.pop()
 install_requires = [
-    'flask',
-    'flask_sijax',
-    'flask-cache',
-    'humanize',
-    'tornado',
-    'demjson',
-    'configparser',
-    'Flask-AutoIndex',
-    'flask-debugtoolbar',
-    'pygments',
     'reporting',
     'goulash',
+
+    'configparser',
+    'demjson',
+    'humanize',
     'Importing',
-    'mongoengine',
-    'pymongo',
     'flask-mongoengine',
+    'flask',
+    'flask-cache',
+    'flask_sijax',
+    'Flask-AutoIndex',
+    'flask-debugtoolbar',
+    'pymongo',
+    'pygments',
+    'mongoengine',
+    'tornado',
 ]
 
 base_url = 'https://github.com/mattvonrocketstein/corkscrew/'
 setup(
-    author       = 'mattvonrocketstein',
-    author_email = '$author@gmail',
-    name         = 'corkscrew',
-    description  = 'ooviews, settings, and basic authentication for flask',
-    install_requires=install_requires,
-    version      = __version__,
-    url          = base_url,
+    author               = 'mattvonrocketstein',
+    author_email         = '$author@gmail',
+    name                 = 'corkscrew',
+    description          = 'ooviews, settings, auth & more for flask',
+    install_requires     = install_requires,
+    version              = __version__,
+    url                  = base_url,
     include_package_data = True,
-    packages     = ['corkscrew'],
-    keywords     = ['flask'],
-    entry_points = dict(
+    packages             = ['corkscrew'],
+    keywords             = ['flask'],
+    entry_points         = dict(
         console_scripts=['corkscrew = corkscrew.bin._corkscrew:entry',])
     )
