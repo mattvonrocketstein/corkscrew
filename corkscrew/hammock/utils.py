@@ -1,11 +1,11 @@
-""" hammock.utils
+""" corkscrew.hammock.utils
 """
 
 from flask import redirect
 
 from types import FunctionType
-from report import getReporter
-report2 = getReporter(label=False)
+from report import Reporter
+report2 = Reporter(label=False)
 
 
 def authorization_required(func):

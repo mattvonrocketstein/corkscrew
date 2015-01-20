@@ -10,8 +10,10 @@ DEFAULT_MENU = [
         ['was posted','#'] ]
     ]]
 class MenuError(Exception): pass
+
 class MakeMenu(View):
     url = '/_make_menu'
+    menu = None
     template = 'base_ajax.html'
     methods = 'get post'.split()
     def _check_menu(self, menu):
@@ -34,7 +36,8 @@ class MakeMenu(View):
         menu = self['menu']
         if isinstance(menu, basestring):
             menu = demjson.decode(menu)
-        if menu is None: menu = DEFAULT_MENU
+        if menu is None:
+            menu = self.menu or DEFAULT_MENU
         self._check_menu(menu)
         return menu
 

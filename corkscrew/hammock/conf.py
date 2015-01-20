@@ -24,5 +24,5 @@ class Settings(_Settings):
     def shell_namespace(self):
         """
         """
-        dct = super(Settings,self).shell_namespace()
+        dct = super(Settings, self).shell_namespace()
         return dct

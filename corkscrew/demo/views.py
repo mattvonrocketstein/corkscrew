@@ -39,7 +39,7 @@ class Home(View):
                   ['/json_editor','a simple json editor'],
                   ['/redirect', ('example redirect (define as '
                                  'many as you want in the .ini)')],
-                  ['/__views__' , 'shows views in this runtime'],
+                  ['/_admin' , 'shows admin tools (schema, views, config, etc)'],
                   ["/_make_menu?menu=[['menu-header',[['menu-item','/']]]]" ,
                    'a parametric menu-maker, suitable for loading with ajax'],
                   ['/__settings__' , 'settings in this runtime'],

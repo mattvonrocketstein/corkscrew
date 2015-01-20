@@ -29,10 +29,10 @@ class Overrides(BaseSettings):
     environ_key  = 'CORKSCREW_SETTINGS'
     default_file = 'corkscrew.ini'
 
-    @classmethod
-    def get_parser(kls):
+
+    def get_parser(self):
         """ build the default parser """
-        parser = super(Overrides, kls).get_parser()
+        parser = super(Overrides, self).get_parser()
         parser.add_option("--port",  dest="port",
                           default='', help="server listen port")
         parser.add_option("--runner",  dest="runner",
@@ -275,12 +275,18 @@ class FlaskSettings(Overrides):
     def _setup_sijax(self, app):
         ssp = os.path.join(app.static_folder, 'js', 'sijax')
         app.config['SIJAX_STATIC_PATH'] = ssp
-        assert os.path.exists(ssp),"SIJAX_STATIC_PATH@'{0}' does not exist".format(ssp)
+        if not os.path.exists(ssp):
+            err = "SIJAX_STATIC_PATH@'{0}' does not exist, creating it"
+            err = err.format(ssp)
+            report(err)
+            os.makedirs(ssp)
         app.config["SIJAX_JSON_URI"] = '/static/js/sijax/json2.js'
         report("sijax settings: \n  {0}".format(
             dict(SIJAX_STATIC_PATH=app.config['SIJAX_STATIC_PATH'],
                  SIJAX_JSON_URI = app.config['SIJAX_JSON_URI'])))
         flask_sijax.Sijax(app)
+
 class SettingsError(ValueError):
     pass
+
 Settings = FlaskSettings
