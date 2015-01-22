@@ -192,6 +192,7 @@ class FlaskSettings(Overrides):
         console.draw_line()
         app.template_filter()(humanize.naturaltime)
         app.template_filter()(humanize.naturaldate)
+        app.template_filter()(humanize.intcomma)
         #app.template_filter()(urlify_markdown)
         #app.template_filter()(markdown.markdown)
         self._app_cache = app
