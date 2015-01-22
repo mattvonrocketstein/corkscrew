@@ -1,0 +1,9 @@
+#
+# corkscrew/tests/requirements.txt
+#
+# used by tox for testing-only requirements
+#
+pytest
+coverage==3.7.1
+pytest-cov
+mock

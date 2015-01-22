@@ -1,6 +1,6 @@
 """ corkscrew.admin
 """
-from corkscrew import View
+from corkscrew.views.base import View
 from corkscrew.blueprint import BluePrint
 
 from pygments import highlight
@@ -31,3 +31,31 @@ class AdminView(View):
 
     def main(self):
         return self.render_template(env='?')
+
+class SettingsView(View):
+    url           = '/__settings__'
+    requires_auth = True
+    template      = "admin_settings.html"
+
+    def main(self):
+        return self.render(
+                app_data=self._get_app_data(),
+                views=self.settings._installed_views)
+
+    def _get_app_data(self):
+        data = dict()
+        for x in dir(self.app):
+            if not x.startswith('_'):
+                val = getattr(self.app,x)
+                if not callable(val):
+                    tmp = str(val).replace('<','(').replace('>',')')
+                    data[x]=tmp
+        uninteresting = [
+            'debug_log_format',
+            'permanent_session_lifetime',
+            ]
+        for x in uninteresting:
+            data.pop(x, None)
+        data=data.items()
+        data.sort()
+        return data
