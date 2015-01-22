@@ -2,10 +2,10 @@
 """
 from report import report
 from corkscrew.reflect import namedAny
-from goulash.settings import SettingsError
 
 def _setup_pre_request(settings, app):
-    flask_section = settings.get_section('flask', insist=True)
+    """ """
+    #flask_section = settings.get_section('flask', insist=True)
     before_request = settings.get_setting('flask.before_request')
     if before_request is not None:
         before_request = namedAny(before_request)
@@ -15,7 +15,7 @@ def _setup_views(settings, app):
     """ NOTE: at this point app is only partially setup.
         (do not attempt to use the app @property here)
     """
-    corkscrew_section = settings.get_section('corkscrew', insist=True)
+    #corkscrew_section = settings.get_section('corkscrew', insist=True)
     view_holder = settings.get_setting('corkscrew.views',insist=True)
 
     view_list = namedAny(view_holder)

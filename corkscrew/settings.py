@@ -5,7 +5,6 @@ import os
 import base64
 import warnings
 import importlib
-import configparser
 
 import humanize
 import flask_sijax
@@ -14,7 +13,6 @@ from flask.ext.mongoengine import MongoEngine
 from werkzeug import generate_password_hash
 
 from report import report, console
-from goulash.wrappers import Dictionaryish
 from goulash.settings import Settings as BaseSettings
 from goulash.settings import SettingsError
 
@@ -286,8 +284,5 @@ class FlaskSettings(Overrides):
             dict(SIJAX_STATIC_PATH=app.config['SIJAX_STATIC_PATH'],
                  SIJAX_JSON_URI = app.config['SIJAX_JSON_URI'])))
         flask_sijax.Sijax(app)
-
-class SettingsError(ValueError):
-    pass
 
 Settings = FlaskSettings
