@@ -95,7 +95,7 @@ class Overrides(BaseSettings):
         # update the implied user section
         self['user']['encode_password'] = self.options.encode
         self['user']['runner'] = self.options.runner
-        corkscrew.SETTTINGS = self
+        corkscrew.SETTINGS = self
 
 class FlaskSettings(Overrides):
     """ combination option parser / settings parser for flask
