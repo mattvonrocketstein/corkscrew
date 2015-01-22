@@ -3,6 +3,7 @@
 import demjson
 from collections import OrderedDict
 
+from corkscrew.admin import AdminView
 from corkscrew.views import View
 from corkscrew.views import JSONEdit
 from corkscrew.comet import SijaxDemo
@@ -14,26 +15,12 @@ class MyMenu(MakeMenu):
     pass
 
 class Home(View):
-    url = '/'
 
-    @View.use_local_template
+    url      = '/'
+    template = 'demo_home.html'
+
     def main(self):
-        """
-        <strong>various demos</strong>
-        <div style="margin-left:15px">
-            {% for k,v in demos.items()%}
-            <b><a href="{{k}}">{{k}}</a></b><br/><span style=margin-left:15px>
-            {{v}}</span><br/><br/>
-            {%endfor%}
-        </div><hr>
-        <strong>app metatdata</strong>
-        <table style="margin-left:15px">
-            {% for k,v in app_metadata.items()%}
-            <tr><td><b>{{k}}</b></td><td>{{v}}</td></tr>
-            {%endfor%}
-        </table><hr>
-        """
-        return dict(
+        return self.render(
             demos=OrderedDict(
                 [ ['/comet?start=1','comet demo (via sijax)'],
                   ['/json_editor','a simple json editor'],
@@ -74,7 +61,7 @@ class DemoJSONEdit(JSONEdit):
                      subobj = dict(
                          arr=["foo", "ha"],
                          numero= 1))))
-from corkscrew.admin import AdminView
+
 __views__ = [
     Home, Nav,
     DemoPage,

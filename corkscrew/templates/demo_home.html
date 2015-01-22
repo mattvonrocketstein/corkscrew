@@ -1,0 +1,25 @@
+{%extends "layout.html"%}
+
+{%block body_title%} {{body_title or "admin"}} {%endblock%}
+
+{%block body%}
+<strong>various demos</strong>
+<div style="margin-left:15px">
+  {% for k,v in demos.items()%}
+  <b><a href="{{k}}">{{k}}</a></b><br/><span style=margin-left:15px>
+    {{v}}</span><br/><br/>
+  {%endfor%}
+</div>
+<br/>
+<hr/>
+<br/>
+<strong>app metatdata</strong>
+<table style="margin-left:15px">
+  {% for k,v in app_metadata.items()%}
+  <tr><td><b>{{k}}</b></td><td>{{v}}</td></tr>
+  {%endfor%}
+</table>
+<br/>
+<hr/>
+
+{%endblock%}
