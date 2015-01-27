@@ -5,7 +5,7 @@
 #from .remove import Remove
 
 #TODO: move to utilities
-#from hammock.util import nomprivate_editable
+
 import demjson
 from collections import defaultdict
 
@@ -74,7 +74,7 @@ class Editable(object):
             for skey, sval in self.request.args.items():
                 if skey==key:
                     val = sval
-            widget = self._get_widget(key, value=val, schema=self.db_schema)
+            widget = self._get_widget(key, value=val, schema=self.db_schema, entry=entry)
             editable_parts.append([key, widget])
 
         # find keys unexpected missing from request that are still in schema.
@@ -87,12 +87,14 @@ class Editable(object):
                 [key,
                  self._get_widget(key,
                                   value = self.db_schema._fields[key].default,
-                                  schema=self.db_schema)])
+                                  schema=self.db_schema,
+                                  entry=entry)])
         return render_template(self.edit_template,
                                update_url=self.update_url,
                                id=_id,
                                obj=editable_parts)
-    def _get_widget(self, key, value=None, schema=None):
+
+    def _get_widget(self, key, value=None, schema=None, entry=None):
         template = self._get_template(key, value=value, schema=schema,)
         field = getattr(schema, key, None)
         if field is None:
@@ -100,7 +102,9 @@ class Editable(object):
         if isinstance(field, ListField):
             # get rid of u's for stuff like [u"foo",]
             value = demjson.encode(value)
-        result = template.render(key=key, default="DEFAULT-IS-DEPRECATED",
+        result = template.render(key=key,
+                                 this=entry,
+                                 default="DEFAULT-IS-DEPRECATED",
                                  # because we dont want to have stuff like
                                  # value="["one"]" in the html
                                  value=unicode(value).replace('"', "'"))
@@ -111,7 +115,7 @@ class Editable(object):
             database schema, failing that return the default
         """
         from_schema_definition = schema._render.get(key, None)
-        from_best_guess = TYPE_MAP[type(getattr(schema,key))]
+        from_best_guess = TYPE_MAP[type(getattr(schema, key))]
         if from_schema_definition:
             out = from_schema_definition
         else:
