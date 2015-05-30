@@ -21,13 +21,13 @@ def _setup_views(settings, app):
     view_list = namedAny(view_holder)
     view_instances = []
     for v in view_list:
-        try:
-            view_instances.append(v(app=app, settings=settings))
-        except Exception:
-            report('error working with view: '+str(v))
-            raise
+        view_instances.append(v(app=app, settings=settings))
     for v in view_instances:
-        sub_views = v.install_into_app(app)
+        try:
+            sub_views = v.install_into_app(app)
+        except Exception:
+            report("View is broken! ",v)
+            
         view_instances += sub_views
     return view_instances
 
