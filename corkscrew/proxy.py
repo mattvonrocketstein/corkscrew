@@ -31,11 +31,23 @@ class ViewsFromSettings(FlaskView):
         out = []
         subsection = self.settings.get_section(
             self.settings_subsection, insist=True)
-        for local_url in subsection:
+        local_urls = [x for x in subsection.keys() if x.startswith('/')]
+        for local_url in local_urls:
             proxy_url = subsection[local_url]
-            name = 'Dynamic{0}:{1}'.format(self.settings_subsection, local_url)
-            View = type(name,
-                        (self.concrete_view_class,), dict(proxy_url=proxy_url, url=local_url))
+            # generate an excruciatingly ugly class name here,
+            # because flask wants it to be unique.
+            kls_name = 'DynamicViewFromSettings_{0}_{1}'
+            kls_name = kls_name.format(self.settings_subsection,
+                                       local_url.replace('/',''))
+            kls_doc = ("ProxyView, generated from settings .ini,"
+                       " where (local,remote) is ({0}, {1})")
+            kls_doc = kls_doc.format(local_url, proxy_url)
+            kls_namespace = dict(
+                __doc__=kls_doc,
+                proxy_url=proxy_url,
+                url=local_url)
+            kls_bases = (self.concrete_view_class, )
+            View = type(kls_name, kls_bases, kls_namespace)
             view = View(app=app, settings=self.settings)
             view.install_into_app(app)
             out.append(view)

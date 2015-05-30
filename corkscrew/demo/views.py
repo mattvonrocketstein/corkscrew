@@ -9,7 +9,7 @@ from corkscrew.views import JSONEdit
 from corkscrew.comet import SijaxDemo
 from corkscrew.admin import SettingsView
 from corkscrew.views.nav import Nav, MakeMenu
-from corkscrew.proxy import RedirectsFromSettings#, ProxyFromSettings
+from corkscrew.proxy import RedirectsFromSettings
 
 class MyMenu(MakeMenu):
     pass

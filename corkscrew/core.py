@@ -26,8 +26,8 @@ def _setup_views(settings, app):
         try:
             sub_views = v.install_into_app(app)
         except Exception:
-            report("View is broken! ",v)
-            
+            report("View is broken! ", v)
+            raise
         view_instances += sub_views
     return view_instances
 
