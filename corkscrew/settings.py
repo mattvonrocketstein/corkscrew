@@ -31,11 +31,11 @@ class Overrides(BaseSettings):
     def get_parser(self):
         """ build the default parser """
         parser = super(Overrides, self).get_parser()
-        parser.add_option("--port",  dest="port",
+        parser.add_argument("--port",  dest="port",
                           default='', help="server listen port")
-        parser.add_option("--runner",  dest="runner",
+        parser.add_argument("--runner",  dest="runner",
                           default='', help="dotpath for app server")
-        parser.add_option("--encode", dest='encode',
+        parser.add_argument("--encode", dest='encode',
                           default="",
                           help="encode password hash using werkzeug")
         return parser
