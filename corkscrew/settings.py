@@ -140,6 +140,17 @@ class FlaskSettings(Overrides):
         else:
             return DirView(app=app, settings=self)
 
+    def _setup_logging(self, app):
+        import logging
+        from logging.handlers import RotatingFileHandler
+        fmt = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+        formatter = logging.Formatter(fmt)
+        fname = os.path.expanduser(self['corkscrew']['logfile'])
+        handler = RotatingFileHandler(fname, maxBytes=10000, backupCount=1)
+        handler.setLevel(0)
+        handler.setFormatter(formatter)
+        app.logger.addHandler(handler)
+
     def _get_app(self):
         if self._app_cache: return self._app_cache
         ## set flask specific things that are non-optional
@@ -154,7 +165,7 @@ class FlaskSettings(Overrides):
 
         app = Flask(app_name, static_folder=static_folder)
         self._setup_secret_key(app)
-
+        self._setup_logging(app)
         ## set flask specific things that are optional
         flask_section = self['flask']
         corkscrew_section = self.get_section('corkscrew', insist=True)
