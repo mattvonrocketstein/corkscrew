@@ -1,5 +1,6 @@
 """ corkscrew.views.base
 """
+import json
 
 import flask
 from flask import jsonify, g, redirect
@@ -80,7 +81,7 @@ class FlaskView(LazyView):
             report(msg)
         if self.returns_json:
             try:
-                result = jsonify(**result)
+                result = json.dumps(result)#jsonify(result)#, safe=False)
             except TypeError:
                 raise TypeError(
                     ('{0} cannot JSONify "{1}", but '

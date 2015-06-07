@@ -6,5 +6,6 @@ import json
 import addict
 
 class App(addict.Dict):
-    def render_json(self):
-        return json.dumps(dict(self))
+    pass
+    #def render_json(self):
+    #    return json.dumps(dict(self))
