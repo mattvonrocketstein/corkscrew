@@ -57,6 +57,7 @@ class Overrides(BaseSettings):
         super(Overrides, self).show_version()
         from corkscrew import __version__
         print 'corkscrew=={0}'.format(__version__)
+        raise SystemExit()
 
     def run(self, *args, **kargs):
         """ this is a thing that probably does not belong in a
@@ -145,7 +146,10 @@ class FlaskSettings(Overrides):
         from logging.handlers import RotatingFileHandler
         fmt = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
         formatter = logging.Formatter(fmt)
-        fname = os.path.expanduser(self['corkscrew']['logfile'])
+        try:
+            fname = os.path.expanduser(self['corkscrew']['logfile'])
+        except KeyError:
+            fname = os.path.join(os.getcwd(),'corkscrew.log')
         handler = RotatingFileHandler(fname, maxBytes=10000, backupCount=1)
         handler.setLevel(0)
         handler.setFormatter(formatter)
